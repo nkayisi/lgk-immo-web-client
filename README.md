@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏠 LGK Immo - Plateforme Immobilière Moderne
 
-## Getting Started
+Plateforme immobilière nouvelle génération avec authentification Better-Auth intégrée, analyses géospatiales et cartographie interactive.
 
-First, run the development server:
+## 🚀 Démarrage Rapide
+
+### 1. Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Créer un fichier `.env.local` à la racine du projet :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/lgk_immo"
 
-## Learn More
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+BETTER_AUTH_SECRET="your-super-secret-key-min-32-characters-long"
 
-To learn more about Next.js, take a look at the following resources:
+# OAuth - Google
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# OAuth - Facebook
+FACEBOOK_CLIENT_ID="your-facebook-app-id"
+FACEBOOK_CLIENT_SECRET="your-facebook-app-secret"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Base de Données
 
-## Deploy on Vercel
+```bash
+pnpm prisma generate
+pnpm prisma db push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Lancer l'Application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dev
+```
+
+Ouvrir [http://localhost:3000](http://localhost:3000)
+
+## 📚 Documentation
+
+- **[SETUP_COMPLETE.md](./SETUP_COMPLETE.md)** - Guide de configuration complet
+- **[IMPLEMENTATION_COMPLETE.md](../IMPLEMENTATION_COMPLETE.md)** - Détails d'implémentation
+
+## 🛠️ Stack Technique
+
+- **Framework**: Next.js 16 (App Router)
+- **Authentification**: Better-Auth (intégré)
+- **Base de données**: PostgreSQL + Prisma 7
+- **Styling**: Tailwind CSS 4
+- **Icons**: Lucide React
+- **TypeScript**: Type-safety complète
+
+## 📁 Structure
+
+```
+src/
+├── app/
+│   ├── api/auth/[...all]/     # Better-Auth API routes
+│   ├── (auth)/                # Pages d'authentification
+│   ├── (protected)/           # Pages protégées
+│   └── page.tsx               # Page d'accueil
+├── components/
+│   ├── home/                  # Composants page d'accueil
+│   ├── auth/                  # Formulaires auth
+│   └── ui/                    # Composants UI
+├── lib/
+│   ├── auth.ts                # Config Better-Auth
+│   └── auth-client.ts         # Client Better-Auth
+└── middleware.ts              # Protection des routes
+```
+
+## 🔐 Authentification
+
+- ✅ Email/Password
+- ✅ OAuth Google
+- ✅ OAuth Facebook
+- ✅ JWT + Refresh Tokens
+- ✅ Sessions en DB
+- ✅ Cookies sécurisés
+
+## 🎨 Fonctionnalités
+
+- ✅ Page d'accueil immobilière premium
+- ✅ Propriétés en vedette
+- ✅ Baromètres de marché
+- ✅ Carte interactive
+- ✅ Design responsive
+- ✅ Navigation moderne
+
+## 📝 Scripts
+
+```bash
+pnpm dev          # Développement
+pnpm build        # Build production
+pnpm start        # Démarrer en production
+pnpm lint         # Linter
+pnpm prisma:studio # DB GUI
+```
+
+## 🔗 Liens Utiles
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [Better-Auth Docs](https://better-auth.com)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+
+---
+
+**LGK Immo** - Plateforme immobilière avec intelligence géospatiale
