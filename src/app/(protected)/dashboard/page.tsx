@@ -1,34 +1,37 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
+import { useSession } from "@/lib/auth-client";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
+    if (!isPending && !session) {
+      router.push("/");
     }
-  }, [loading, isAuthenticated, router]);
+  }, [isPending, session, router]);
 
-  if (loading) {
+  if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto" />
           <p className="mt-4 text-gray-600">Chargement...</p>
         </div>
       </div>
     );
   }
 
-  if (!user) {
+  if (!session?.user) {
     return null;
   }
+
+  const user = session.user;
 
   return (
     <div className="min-h-screen bg-gray-50">

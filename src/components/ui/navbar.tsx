@@ -1,164 +1,259 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Building2,
   Menu,
   X,
-  Search,
-  MapPin,
-  Home,
-  Key,
-  Shield,
-  Globe2,
-  ChevronDown,
+  Globe,
   User,
+  Plus,
+  LayoutDashboard,
+  Heart,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Building2,
+  MessageSquare,
+  Bell,
 } from "lucide-react";
-
-const navLinks = [
-  {
-    label: "Acheter",
-    href: "/buy",
-    icon: Home,
-    submenu: [
-      { label: "Villas", href: "/buy/villas" },
-      { label: "Appartements", href: "/buy/apartments" },
-      { label: "Terrains", href: "/buy/land" },
-      { label: "Commerces", href: "/buy/commercial" },
-    ],
-  },
-  {
-    label: "Louer",
-    href: "/rent",
-    icon: Key,
-    submenu: [
-      { label: "Longue durée", href: "/rent/long-term" },
-      { label: "Courte durée", href: "/rent/short-term" },
-      { label: "Meublé", href: "/rent/furnished" },
-    ],
-  },
-  { label: "Carte", href: "/map", icon: MapPin },
-  { label: "Certification", href: "/certification", icon: Shield },
-  { label: "Diaspora", href: "/diaspora", icon: Globe2 },
-];
+import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+
+  const user = session?.user;
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fermer le menu utilisateur quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setShowUserMenu(false);
+    router.push("/");
+  };
+
+  // Obtenir les initiales de l'utilisateur
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-slate-950/90 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-emerald-500/5"
+          ? "bg-white/20 backdrop-blur-xl border-b border-slate-200"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 3 }}
-              className="relative w-12 h-12 bg-gradient-to-br from-emerald-500 via-cyan-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30"
-            >
-              <Building2 className="w-7 h-7 text-white" />
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity" />
-            </motion.div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xl text-white">LGK Immo</span>
-              <span className="text-[10px] text-emerald-400 font-medium tracking-wider uppercase">
-                RD Congo
-              </span>
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <span className="text-white font-bold text-lg">L</span>
             </div>
+            <span className="font-semibold text-xl text-slate-900">
+              LGK<span className="text-emerald-500">.</span>
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <div
-                key={link.href}
-                className="relative"
-                onMouseEnter={() =>
-                  link.submenu && setActiveSubmenu(link.label)
-                }
-                onMouseLeave={() => setActiveSubmenu(null)}
-              >
-                <Link
-                  href={link.href}
-                  className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white font-medium transition-colors rounded-xl hover:bg-white/5"
-                >
-                  <link.icon className="w-4 h-4" />
-                  {link.label}
-                  {link.submenu && <ChevronDown className="w-3 h-3" />}
-                </Link>
+          {/* Desktop Right */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Ajouter un bien */}
+            <Link
+              href="/dashboard/properties/new"
+              className="flex items-center gap-2 border border-slate-200 rounded-full px-4 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Deposer une annonce
+            </Link>
 
-                {/* Submenu */}
+            {/* Divider */}
+            <div className="w-px h-6 bg-slate-200" />
+
+            {/* Language */}
+            <button className="flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors">
+              <Globe className="w-4 h-4" />
+              <span className="text-sm font-medium">FR</span>
+            </button>
+
+            {/* Auth - Conditionnel */}
+            {isPending ? (
+              // Loading state
+              <div className="w-10 h-10 rounded-full bg-slate-100 animate-pulse" />
+            ) : user ? (
+              // Utilisateur connecté - Menu avatar
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 p-1.5 rounded-full border border-slate-200 hover:shadow-md transition-all bg-white"
+                >
+                  <Menu className="w-4 h-4 text-slate-500 ml-1" />
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt={user.name || "Avatar"}
+                      width={32}
+                      height={32}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-sm font-medium">
+                      {getInitials(user.name)}
+                    </div>
+                  )}
+                </button>
+
+                {/* Dropdown Menu */}
                 <AnimatePresence>
-                  {link.submenu && activeSubmenu === link.label && (
+                  {showUserMenu && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
                     >
-                      {link.submenu.map((sublink, i) => (
+                      {/* User Info */}
+                      <div className="px-4 py-3 border-b border-slate-100">
+                        <p className="font-medium text-slate-900 truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-sm text-slate-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-2">
                         <Link
-                          key={i}
-                          href={sublink.href}
-                          className="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                          href="/dashboard"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                          {sublink.label}
+                          <LayoutDashboard className="w-4 h-4 text-slate-400" />
+                          <span>Tableau de bord</span>
                         </Link>
-                      ))}
+                        <Link
+                          href="/dashboard/properties"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <Building2 className="w-4 h-4 text-slate-400" />
+                          <span>Mes annonces</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/favorites"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <Heart className="w-4 h-4 text-slate-400" />
+                          <span>Favoris</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/messages"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <MessageSquare className="w-4 h-4 text-slate-400" />
+                          <span>Messages</span>
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-slate-100 py-2">
+                        <Link
+                          href="/dashboard/profile"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-slate-400" />
+                          <span>Mon profil</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/settings"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <Settings className="w-4 h-4 text-slate-400" />
+                          <span>Paramètres</span>
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-slate-100 py-2">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors w-full"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Déconnexion</span>
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            ))}
-          </div>
-
-          {/* Desktop Auth */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="flex items-center gap-2 px-4 py-2.5 text-slate-300 hover:text-white font-medium transition-colors"
-            >
-              <User className="w-4 h-4" />
-              Connexion
-            </Link>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/register"
-                className="relative px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-xl font-semibold overflow-hidden group shadow-lg shadow-emerald-500/30"
-              >
-                <span className="relative z-10">S'inscrire</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Link>
-            </motion.div>
+            ) : (
+              // Utilisateur non connecté - Boutons auth
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-5 py-2.5 bg-slate-900 text-white font-medium rounded-full hover:bg-slate-800 transition-colors"
+                >
+                  S'inscrire
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 text-slate-300 hover:text-white transition-colors"
+            className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </motion.button>
+          </button>
         </div>
       </div>
 
@@ -169,49 +264,124 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-slate-950/98 backdrop-blur-2xl border-t border-white/10"
+            className="md:hidden bg-white border-t border-slate-100"
           >
-            <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-              {/* Mobile Search */}
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Rechercher un bien..."
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
+            <div className="px-4 py-6 space-y-4">
+              {/* Ajouter un bien */}
+              <Link
+                href="/dashboard/properties/new"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              >
+                <Plus className="w-5 h-5 text-emerald-500" />
+                Deposer une annonce
+              </Link>
 
-              {/* Mobile Links */}
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl font-medium transition-colors"
-                >
-                  <link.icon className="w-5 h-5 text-emerald-400" />
-                  {link.label}
-                </Link>
-              ))}
+              {user ? (
+                // Menu utilisateur connecté (mobile)
+                <div className="pt-4 border-t border-slate-100 space-y-1">
+                  {/* User Info */}
+                  <div className="flex items-center gap-3 py-3">
+                    {user.image ? (
+                      <Image
+                        src={user.image}
+                        alt={user.name || "Avatar"}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-medium">
+                        {getInitials(user.name)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-slate-900">{user.name}</p>
+                      <p className="text-sm text-slate-500">{user.email}</p>
+                    </div>
+                  </div>
 
-              {/* Mobile Auth */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
-                <Link
-                  href="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="block px-4 py-3 text-center text-slate-300 hover:bg-white/5 rounded-xl font-medium transition-colors"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsOpen(false)}
-                  className="block px-4 py-3 text-center bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30"
-                >
-                  S'inscrire gratuitement
-                </Link>
-              </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <LayoutDashboard className="w-5 h-5 text-slate-400" />
+                    Tableau de bord
+                  </Link>
+                  <Link
+                    href="/dashboard/properties"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <Building2 className="w-5 h-5 text-slate-400" />
+                    Mes annonces
+                  </Link>
+                  <Link
+                    href="/dashboard/favorites"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <Heart className="w-5 h-5 text-slate-400" />
+                    Favoris
+                  </Link>
+                  <Link
+                    href="/dashboard/messages"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <MessageSquare className="w-5 h-5 text-slate-400" />
+                    Messages
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <User className="w-5 h-5 text-slate-400" />
+                    Mon profil
+                  </Link>
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 py-3 text-slate-700"
+                  >
+                    <Settings className="w-5 h-5 text-slate-400" />
+                    Paramètres
+                  </Link>
+
+                  <div className="pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center gap-3 py-3 text-red-600 w-full"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Déconnexion
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Boutons auth (mobile)
+                <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsOpen(false)}
+                    className="block py-3 text-center bg-slate-900 text-white font-medium rounded-xl"
+                  >
+                    S'inscrire
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

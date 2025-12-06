@@ -1,286 +1,335 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  MapPin,
-  Shield,
   Heart,
-  Eye,
-  Play,
-  ArrowRight,
-  Sparkles,
-  Building2,
-  Home,
   Star,
-  CheckCircle2,
+  Shield,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+  Verified,
 } from "lucide-react";
 import Link from "next/link";
 
 const properties = [
   {
     id: 1,
-    title: "Villa Prestige Gombe",
-    location: "Kinshasa, Gombe",
-    price: "$485,000",
-    dimensions: "25m × 20m",
-    bedrooms: 5,
-    type: "Villa",
-    badge: "Premium",
-    badgeColor: "from-amber-500 to-orange-500",
+    title: "Villa moderne avec jardin",
+    location: "Gombe, Kinshasa",
+    price: 485000,
+    rating: 4.9,
+    reviews: 128,
+    images: [
+      "from-emerald-400 to-cyan-500",
+      "from-violet-400 to-purple-500",
+      "from-amber-400 to-orange-500",
+    ],
     certified: true,
-    riskLevel: "low",
-    virtualTour: true,
-    image: "from-emerald-500/30 via-cyan-500/20 to-blue-500/30",
+    superhost: true,
+    type: "Villa",
+    beds: 5,
+    baths: 4,
   },
   {
     id: 2,
-    title: "Appartement Standing",
-    location: "Kinshasa, Ngaliema",
-    price: "$180,000",
-    dimensions: "15m × 12m",
-    bedrooms: 3,
-    type: "Appartement",
-    badge: "Nouveau",
-    badgeColor: "from-emerald-500 to-cyan-500",
+    title: "Appartement standing vue ville",
+    location: "Ngaliema, Kinshasa",
+    price: 180000,
+    rating: 4.8,
+    reviews: 89,
+    images: [
+      "from-rose-400 to-pink-500",
+      "from-blue-400 to-indigo-500",
+      "from-teal-400 to-emerald-500",
+    ],
     certified: true,
-    riskLevel: "low",
-    virtualTour: true,
-    image: "from-violet-500/30 via-purple-500/20 to-pink-500/30",
+    superhost: false,
+    type: "Appartement",
+    beds: 3,
+    baths: 2,
   },
   {
     id: 3,
-    title: "Terrain Constructible",
-    location: "Kinshasa, Limete",
-    price: "$95,000",
-    dimensions: "30m × 25m",
-    bedrooms: 0,
-    type: "Terrain",
-    badge: "Opportunité",
-    badgeColor: "from-blue-500 to-indigo-500",
+    title: "Terrain constructible 750m²",
+    location: "Limete, Kinshasa",
+    price: 95000,
+    rating: 4.7,
+    reviews: 45,
+    images: [
+      "from-amber-400 to-yellow-500",
+      "from-lime-400 to-green-500",
+      "from-cyan-400 to-blue-500",
+    ],
     certified: true,
-    riskLevel: "medium",
-    virtualTour: false,
-    image: "from-amber-500/30 via-orange-500/20 to-red-500/30",
+    superhost: true,
+    type: "Terrain",
+    beds: 0,
+    baths: 0,
   },
   {
     id: 4,
-    title: "Duplex Moderne",
-    location: "Kinshasa, Bandalungwa",
-    price: "$320,000",
-    dimensions: "20m × 18m",
-    bedrooms: 4,
-    type: "Duplex",
-    badge: "Coup de cœur",
-    badgeColor: "from-rose-500 to-pink-500",
+    title: "Duplex familial sécurisé",
+    location: "Ma Campagne, Kinshasa",
+    price: 320000,
+    rating: 4.95,
+    reviews: 203,
+    images: [
+      "from-indigo-400 to-violet-500",
+      "from-fuchsia-400 to-pink-500",
+      "from-emerald-400 to-teal-500",
+    ],
     certified: true,
-    riskLevel: "low",
-    virtualTour: true,
-    image: "from-cyan-500/30 via-teal-500/20 to-emerald-500/30",
+    superhost: true,
+    type: "Duplex",
+    beds: 4,
+    baths: 3,
+  },
+  {
+    id: 5,
+    title: "Studio meublé centre-ville",
+    location: "Gombe, Kinshasa",
+    price: 75000,
+    rating: 4.6,
+    reviews: 67,
+    images: [
+      "from-sky-400 to-blue-500",
+      "from-orange-400 to-red-500",
+      "from-green-400 to-emerald-500",
+    ],
+    certified: true,
+    superhost: false,
+    type: "Studio",
+    beds: 1,
+    baths: 1,
+  },
+  {
+    id: 6,
+    title: "Maison coloniale rénovée",
+    location: "Barumbu, Kinshasa",
+    price: 420000,
+    rating: 4.85,
+    reviews: 156,
+    images: [
+      "from-stone-400 to-neutral-500",
+      "from-amber-400 to-orange-500",
+      "from-emerald-400 to-green-500",
+    ],
+    certified: true,
+    superhost: true,
+    type: "Maison",
+    beds: 6,
+    baths: 4,
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
+function PropertyCard({ property }: { property: (typeof properties)[0] }) {
+  const [currentImage, setCurrentImage] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0 },
-};
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImage((prev) => (prev + 1) % property.images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImage(
+      (prev) => (prev - 1 + property.images.length) % property.images.length
+    );
+  };
+
+  return (
+    <Link href={`/properties/${property.id}`}>
+      <motion.article
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group cursor-pointer"
+      >
+        {/* Image Container */}
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-3">
+          {/* Gradient Background (placeholder for real images) */}
+          <motion.div
+            animate={{ opacity: 1 }}
+            className={`absolute inset-0 bg-gradient-to-br ${property.images[currentImage]}`}
+          />
+
+          {/* Image Overlay on Hover */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            className="absolute inset-0 bg-black/10"
+          />
+
+          {/* Like Button */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsLiked(!isLiked);
+            }}
+            className="absolute top-3 right-3 z-10"
+          >
+            <motion.div whileTap={{ scale: 0.9 }} className="p-2">
+              <Heart
+                className={`w-6 h-6 transition-all ${
+                  isLiked
+                    ? "fill-red-500 text-red-500"
+                    : "fill-black/30 text-white stroke-2"
+                }`}
+              />
+            </motion.div>
+          </button>
+
+          {/* Certified Badge */}
+          {property.certified && (
+            <div className="absolute top-3 left-3 z-10">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-1 px-2.5 py-1 bg-white rounded-full text-xs font-medium text-slate-900 shadow-sm"
+              >
+                <Shield className="w-3 h-3 text-emerald-500" />
+                Certifié
+              </motion.div>
+            </div>
+          )}
+
+          {/* Navigation Arrows */}
+          <AnimatePresence>
+            {isHovered && property.images.length > 1 && (
+              <>
+                <motion.button
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white rounded-full shadow-md hover:scale-105 transition-transform"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-700" />
+                </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white rounded-full shadow-md hover:scale-105 transition-transform"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-700" />
+                </motion.button>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* Image Dots */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
+            {property.images.map((_, idx) => (
+              <motion.div
+                key={idx}
+                animate={{
+                  scale: currentImage === idx ? 1 : 0.75,
+                  opacity: currentImage === idx ? 1 : 0.5,
+                }}
+                className={`w-1.5 h-1.5 rounded-full bg-white shadow-sm`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-1">
+          {/* Title & Rating */}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-medium text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1">
+              {property.title}
+            </h3>
+            <div className="flex items-center gap-1 shrink-0">
+              <Star className="w-4 h-4 fill-slate-900 text-slate-900" />
+              <span className="text-sm font-medium text-slate-900">
+                {property.rating}
+              </span>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-1 text-slate-500 text-sm">
+            <MapPin className="w-3.5 h-3.5" />
+            {property.location}
+          </div>
+
+          {/* Type & Details */}
+          <p className="text-sm text-slate-500">
+            {property.type}
+            {property.beds > 0 && ` · ${property.beds} ch.`}
+            {property.baths > 0 && ` · ${property.baths} sdb`}
+          </p>
+
+          {/* Price */}
+          <p className="pt-1">
+            <span className="font-semibold text-slate-900">
+              ${property.price.toLocaleString()}
+            </span>
+          </p>
+        </div>
+      </motion.article>
+    </Link>
+  );
+}
+
+// Need to import AnimatePresence
+import { AnimatePresence } from "framer-motion";
 
 export function FeaturedProperties() {
   return (
-    <section className="relative py-24 bg-gradient-to-b from-slate-950 to-slate-900 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-emerald-500/5 via-transparent to-transparent" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12"
+          className="flex items-end justify-between mb-8"
         >
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-4">
-              <Sparkles className="w-4 h-4" />
-              Sélection Premium
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-              Offres du{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-                moment
-              </span>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">
+              Biens à découvrir
             </h2>
-            <p className="text-lg text-slate-400 max-w-xl">
-              Découvrez notre sélection de biens certifiés, vérifiés et prêts
-              pour votre investissement.
+            <p className="text-slate-500 mt-1">
+              Sélection de propriétés certifiées à Kinshasa
             </p>
           </div>
-
           <Link
             href="/properties"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-all group"
+            className="hidden sm:inline-flex text-sm font-medium text-slate-900 hover:text-emerald-600 transition-colors underline underline-offset-4"
           >
             Voir tout
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>
 
         {/* Properties Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {properties.map((property) => (
-            <motion.div
-              key={property.id}
-              variants={cardVariants}
-              whileHover={{ y: -12, scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden"
-            >
-              {/* Image Area */}
-              <div
-                className={`relative aspect-[4/3] bg-gradient-to-br ${property.image} overflow-hidden`}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Building2 className="w-16 h-16 text-white/20" />
-                </div>
-
-                {/* Top Badges */}
-                <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className={`px-3 py-1.5 bg-gradient-to-r ${property.badgeColor} text-white text-xs font-bold rounded-full shadow-lg`}
-                  >
-                    {property.badge}
-                  </motion.div>
-
-                  {property.certified && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-emerald-500/90 text-white text-xs font-semibold rounded-full">
-                      <Shield className="w-3 h-3" />
-                      Certifié
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Info */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <div
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      property.riskLevel === "low"
-                        ? "bg-emerald-500/80 text-white"
-                        : "bg-amber-500/80 text-white"
-                    }`}
-                  >
-                    {property.riskLevel === "low"
-                      ? "● Risque faible"
-                      : "● Risque moyen"}
-                  </div>
-
-                  {property.virtualTour && (
-                    <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all">
-                      <Play className="w-4 h-4 text-white" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                {/* Favorite Button */}
-                <button className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20">
-                  <Heart className="w-4 h-4 text-white" />
-                </button>
-              </div>
-
-              {/* Content */}
-              <div className="p-5 space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
-                    <span className="px-2 py-0.5 bg-white/5 rounded text-xs">
-                      {property.type}
-                    </span>
-                    <span>•</span>
-                    <span>{property.dimensions}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
-                    {property.title}
-                  </h3>
-                  <div className="flex items-center gap-1 text-slate-400 text-sm mt-1">
-                    <MapPin className="w-3 h-3 text-emerald-400" />
-                    {property.location}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                  <div>
-                    <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-                      {property.price}
-                    </div>
-                    {property.bedrooms > 0 && (
-                      <div className="text-xs text-slate-500">
-                        {property.bedrooms} chambres
-                      </div>
-                    )}
-                  </div>
-
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-3 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-xl hover:from-emerald-500/30 hover:to-cyan-500/30 transition-all"
-                  >
-                    <Eye className="w-5 h-5 text-emerald-400" />
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Hover Glow */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            </motion.div>
+            <PropertyCard key={property.id} property={property} />
           ))}
-        </motion.div>
+        </div>
 
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 text-center"
-        >
-          <div className="inline-flex items-center gap-4 p-2 bg-white/5 border border-white/10 rounded-2xl">
-            <div className="flex -space-x-2">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold"
-                >
-                  {String.fromCharCode(65 + i)}
-                </div>
-              ))}
-            </div>
-            <div className="text-left pr-4">
-              <div className="text-white font-semibold">
-                +2,500 biens disponibles
-              </div>
-              <div className="text-sm text-slate-400">
-                Tous certifiés et vérifiés
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Mobile View All */}
+        <div className="mt-8 text-center sm:hidden">
+          <Link
+            href="/properties"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors"
+          >
+            Voir tous les biens
+          </Link>
+        </div>
       </div>
     </section>
   );
