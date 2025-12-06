@@ -1,42 +1,30 @@
 import { HeroSection } from "@/components/home/hero-section";
-import { SearchModule } from "@/components/home/search-module";
 import { FeaturedProperties } from "@/components/home/featured-properties";
-import { MarketProblems } from "@/components/home/market-problems";
-import { ToolsSection } from "@/components/home/tools-section";
-import { MarketInsights } from "@/components/home/market-insights";
-import { InteractiveMap } from "@/components/home/interactive-map";
+import { MapSection } from "@/components/home/map-section";
+import { TrustSection } from "@/components/home/trust-section";
 import { CTASection } from "@/components/home/cta-section";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
       <main>
-        {/* Hero Section - Introduction immobilière RDC */}
+        {/* Hero + Recherche IA */}
         <HeroSection />
 
-        {/* Module de recherche premium */}
-        <SearchModule />
-
-        {/* Problèmes du marché RDC + Solutions LGK */}
-        <MarketProblems />
-
-        {/* Offres du moment - Propriétés certifiées */}
+        {/* Biens à découvrir */}
         <FeaturedProperties />
 
-        {/* Outils innovants LGK-IMMO */}
-        <ToolsSection />
+        {/* Carte interactive */}
+        <MapSection />
 
-        {/* Cartographie interactive des risques */}
-        <InteractiveMap />
+        {/* Confiance & Certification */}
+        <TrustSection />
 
-        {/* Baromètres & Insights immobiliers */}
-        <MarketInsights />
-
-        {/* Call to Action final */}
+        {/* Call to Action */}
         <CTASection />
       </main>
 
