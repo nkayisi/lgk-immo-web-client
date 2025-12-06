@@ -1,26 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { signOut, useSession } from "@/lib/auth-client";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Menu,
-  X,
-  Globe,
-  User,
-  Plus,
-  LayoutDashboard,
-  Heart,
-  Settings,
-  LogOut,
-  ChevronDown,
   Building2,
+  Globe,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Menu,
   MessageSquare,
-  Bell,
+  Plus,
+  Settings,
+  User,
+  X
 } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth-client";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -241,7 +239,7 @@ export function Navbar() {
                   href="/register"
                   className="px-5 py-2.5 bg-slate-900 text-white font-medium rounded-full hover:bg-slate-800 transition-colors"
                 >
-                  S'inscrire
+                  S&apos;inscrire
                 </Link>
               </>
             )}
@@ -378,7 +376,7 @@ export function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className="block py-3 text-center bg-slate-900 text-white font-medium rounded-xl"
                   >
-                    S'inscrire
+                    S&apos;inscrire
                   </Link>
                 </div>
               )}

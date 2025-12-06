@@ -105,7 +105,7 @@ export function InteractiveMap() {
             </span>
           </h2>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            Notre système d'information géographique vous permet de visualiser
+            Notre système d&apos;information géographique vous permet de visualiser
             les risques, les opportunités et les tendances du marché immobilier
             congolais.
           </p>

@@ -246,6 +246,7 @@ export function MapSection() {
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const mapRef = useRef<HTMLDivElement>(null);
+  const [mapWidth, setMapWidth] = useState(900);
 
   // État de la carte interactive
   const [zoom, setZoom] = useState(14);
@@ -253,6 +254,18 @@ export function MapSection() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  // Mettre à jour la largeur de la carte
+  useEffect(() => {
+    const updateMapWidth = () => {
+      if (mapRef.current) {
+        setMapWidth(mapRef.current.clientWidth);
+      }
+    };
+    updateMapWidth();
+    window.addEventListener("resize", updateMapWidth);
+    return () => window.removeEventListener("resize", updateMapWidth);
+  }, []);
 
   // Calculer les tiles visibles
   const tiles = useMemo(() => {
@@ -286,15 +299,7 @@ export function MapSection() {
   // Convertir lat/lng en position pixel sur la carte
   const latLngToPixel = useCallback(
     (lat: number, lng: number) => {
-      const mapWidth = mapRef.current?.clientWidth || 900;
       const mapHeight = 600;
-
-      const centerTile = latLngToTile(center.lat, center.lng, zoom);
-      const pointTile = latLngToTile(lat, lng, zoom);
-
-      // Position relative au centre en tiles
-      const tileOffsetX = pointTile.x - centerTile.x;
-      const tileOffsetY = pointTile.y - centerTile.y;
 
       // Calcul plus précis avec fraction de tile
       const n = Math.pow(2, zoom);
@@ -326,7 +331,7 @@ export function MapSection() {
 
       return { x: pixelX, y: pixelY };
     },
-    [zoom, center, offset]
+    [zoom, center, offset, mapWidth]
   );
 
   // Filtrer les biens
@@ -335,10 +340,14 @@ export function MapSection() {
     return property.isForSale;
   });
 
-  // Reset image index when property changes
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [selectedProperty]);
+  // Sélectionner une propriété et reset l'index d'image
+  const handleSelectProperty = useCallback(
+    (property: (typeof mapProperties)[0] | null) => {
+      setSelectedProperty(property);
+      setCurrentImageIndex(0);
+    },
+    []
+  );
 
   // Gestion du zoom
   const handleZoomIn = () => {
@@ -500,6 +509,7 @@ export function MapSection() {
             {/* Tiles OpenStreetMap */}
             <div className="absolute inset-0">
               {tiles.map((tile) => (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={`${tile.x}-${tile.y}-${zoom}`}
                   src={tile.url}
@@ -527,7 +537,6 @@ export function MapSection() {
                   const isSelected = selectedProperty?.id === property.id;
 
                   // Ne pas afficher si hors de la carte
-                  const mapWidth = mapRef.current?.clientWidth || 900;
                   if (
                     position.x < -50 ||
                     position.x > mapWidth + 50 ||
@@ -556,7 +565,7 @@ export function MapSection() {
                         whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedProperty(property);
+                          handleSelectProperty(property);
                         }}
                         onMouseEnter={() => setHoveredProperty(property.id)}
                         onMouseLeave={() => setHoveredProperty(null)}
@@ -736,7 +745,7 @@ export function MapSection() {
 
                     {/* Bouton fermer */}
                     <button
-                      onClick={() => setSelectedProperty(null)}
+                      onClick={() => handleSelectProperty(null)}
                       className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
                     >
                       <X className="w-4 h-4 text-slate-700" />

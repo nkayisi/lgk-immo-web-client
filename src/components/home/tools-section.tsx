@@ -2,16 +2,15 @@
 
 import { motion } from "framer-motion";
 import {
-  Shield,
-  Map,
-  Video,
-  FileCheck,
-  BarChart3,
-  Globe2,
   ArrowRight,
-  Sparkles,
+  BarChart3,
   CheckCircle2,
-  Zap,
+  FileCheck,
+  Globe2,
+  Map,
+  Shield,
+  Video,
+  Zap
 } from "lucide-react";
 
 const tools = [
@@ -126,7 +125,7 @@ export function ToolsSection() {
             </span>
           </h2>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            Une suite d'outils technologiques conçus pour sécuriser et
+            Une suite d&apos;outils technologiques conçus pour sécuriser et
             simplifier vos investissements immobiliers en RD Congo.
           </p>
         </motion.div>

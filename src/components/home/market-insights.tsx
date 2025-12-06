@@ -2,18 +2,14 @@
 
 import { motion } from "framer-motion";
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Home,
-  Users,
-  BarChart3,
-  ArrowUpRight,
   ArrowDownRight,
-  Building2,
-  MapPin,
+  ArrowUpRight,
+  BarChart3,
   Clock,
+  DollarSign,
+  MapPin,
   Target,
+  TrendingUp
 } from "lucide-react";
 
 const insights = [

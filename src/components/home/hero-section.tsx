@@ -1,28 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Search,
-  MapPin,
-  Sparkles,
-  Home,
-  Building2,
-  LandPlot,
-  Mic,
-  ChevronDown,
-  BedDouble,
-  Key,
-  ShoppingBag,
-  Zap,
-  Bath,
-  Maximize,
-  Heart,
-  BadgeCheck,
   ArrowRight,
+  BadgeCheck,
+  Bath,
+  BedDouble,
+  Building2,
+  ChevronDown,
+  Heart,
+  Home,
+  Key,
+  LandPlot,
+  MapPin,
+  Maximize,
+  Mic,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 // Actions principales (style Airbnb - sans Vendre)
 const actions = [
@@ -203,23 +203,9 @@ export function HeroSection() {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [aiQuery, setAiQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
-
-  // Gestion du scroll pour sticky search
-  useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const heroBottom =
-          heroRef.current.offsetTop + heroRef.current.offsetHeight - 200;
-        setIsSticky(window.scrollY > heroBottom);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

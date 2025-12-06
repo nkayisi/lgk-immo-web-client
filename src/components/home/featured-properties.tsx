@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Heart,
-  Star,
-  Shield,
-  MapPin,
   ChevronLeft,
   ChevronRight,
-  Verified,
+  Heart,
+  MapPin,
+  Shield,
+  Star
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 const properties = [
   {

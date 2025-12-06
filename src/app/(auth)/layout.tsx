@@ -82,7 +82,7 @@ export default function AuthLayout({
             </div>
 
             <blockquote className="text-2xl xl:text-3xl font-medium text-slate-800 leading-relaxed mb-8">
-              &ldquo;LGK Immo m'a permis de trouver l'appartement parfait à
+              &ldquo;LGK Immo m&apos;a permis de trouver l&apos;appartement parfait à
               Kinshasa en seulement 2 semaines. Une plateforme vraiment
               révolutionnaire !&rdquo;
             </blockquote>
@@ -96,7 +96,7 @@ export default function AuthLayout({
                   Jean-Marie Kabongo
                 </p>
                 <p className="text-slate-500 text-sm">
-                  Propriétaire à Gombe, Kinshasa
+                  Propriétaire à Gombe, Kinshasa  
                 </p>
               </div>
             </div>

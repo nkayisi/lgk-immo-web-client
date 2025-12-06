@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Search,
-  MapPin,
-  Home,
-  Key,
   Building2,
   Calendar,
   ChevronDown,
-  Sparkles,
-  Filter,
+  Home,
+  Key,
+  MapPin,
+  Search,
   SlidersHorizontal,
+  Sparkles
 } from "lucide-react";
+import { useState } from "react";
 
 const propertyTypes = [
   { id: "all", label: "Tous", icon: Building2 },
