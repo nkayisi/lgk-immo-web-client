@@ -180,6 +180,14 @@ export const auth = betterAuth({
     cookiePrefix: "lgk_auth",
     useSecureCookies: process.env.NODE_ENV === "production",
   },
+
+  // Permettre de lier plusieurs providers au même compte (même email)
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "facebook"],
+    },
+  },
 })
 
 export type Session = typeof auth.$Infer.Session

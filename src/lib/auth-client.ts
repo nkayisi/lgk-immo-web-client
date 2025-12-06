@@ -44,7 +44,7 @@ export const sendVerificationEmail = async (email: string, callbackURL?: string)
     method: "POST",
     body: {
       email,
-      callbackURL: callbackURL || "/dashboard",
+      callbackURL: callbackURL || "/",
     },
   })
 }
