@@ -72,9 +72,15 @@ export function RegisterForm() {
     try {
       const result = await signUp.email({ email, password, name });
       if (result.error) {
+        // Si l'erreur est liée à la vérification d'email, rediriger vers la page de vérification
+        if (result.error.status === 403) {
+          router.push("/verify-email");
+          return;
+        }
         setError(result.error.message || "Échec de la création du compte");
       } else {
-        router.push("/dashboard");
+        // Rediriger vers la page de vérification d'email
+        router.push("/verify-email");
       }
     } catch (err: unknown) {
       const message =

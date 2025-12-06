@@ -30,6 +30,11 @@ export function LoginForm() {
     try {
       const result = await signIn.email({ email, password });
       if (result.error) {
+        // Si l'email n'est pas vérifié, rediriger vers la page de vérification
+        if (result.error.status === 403) {
+          router.push("/verify-email");
+          return;
+        }
         setError(result.error.message || "Échec de la connexion");
       } else {
         router.push("/dashboard");
