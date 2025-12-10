@@ -13,7 +13,7 @@ import {
   Plus,
   Settings,
   User,
-  X
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -255,126 +255,173 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Fullscreen */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-slate-100"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="md:hidden fixed inset-0 z-50 bg-white"
           >
-            <div className="px-4 py-6 space-y-4">
-              {/* Ajouter un bien */}
+            {/* Header avec bouton fermer */}
+            <div className="flex items-center justify-between px-4 h-20 border-b border-slate-100">
+              <Link
+                href="/"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                  <span className="text-white font-bold text-lg">L</span>
+                </div>
+                <span className="font-semibold text-xl text-slate-900">
+                  LGK<span className="text-emerald-500">.</span>
+                </span>
+              </Link>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Menu Content - Scrollable */}
+            <div className="bg-white overflow-y-auto h-[calc(100vh-5rem)] px-6 py-8">
+              {/* Ajouter un bien - CTA principal */}
               <Link
                 href="/dashboard/properties/new"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-2xl shadow-lg shadow-emerald-500/20 mb-8"
               >
-                <Plus className="w-5 h-5 text-emerald-500" />
+                <Plus className="w-5 h-5" />
                 Deposer une annonce
               </Link>
 
               {user ? (
                 // Menu utilisateur connecté (mobile)
-                <div className="pt-4 border-t border-slate-100 space-y-1">
-                  {/* User Info */}
-                  <div className="flex items-center gap-3 py-3">
+                <div className="space-y-2">
+                  {/* User Info Card */}
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl mb-6">
                     {user.image ? (
                       <Image
                         src={user.image}
                         alt={user.name || "Avatar"}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full object-cover"
+                        width={56}
+                        height={56}
+                        className="w-14 h-14 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-medium">
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-xl font-medium">
                         {getInitials(user.name)}
                       </div>
                     )}
-                    <div>
-                      <p className="font-medium text-slate-900">{user.name}</p>
-                      <p className="text-sm text-slate-500">{user.email}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-lg text-slate-900 truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-slate-500 truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
 
+                  {/* Navigation Links */}
                   <Link
                     href="/dashboard"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <LayoutDashboard className="w-5 h-5 text-slate-400" />
-                    Tableau de bord
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                      <LayoutDashboard className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="font-medium">Tableau de bord</span>
                   </Link>
                   <Link
                     href="/dashboard/properties"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <Building2 className="w-5 h-5 text-slate-400" />
-                    Mes annonces
+                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <span className="font-medium">Mes annonces</span>
                   </Link>
                   <Link
                     href="/dashboard/favorites"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <Heart className="w-5 h-5 text-slate-400" />
-                    Favoris
+                    <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-pink-600" />
+                    </div>
+                    <span className="font-medium">Favoris</span>
                   </Link>
                   <Link
                     href="/dashboard/messages"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <MessageSquare className="w-5 h-5 text-slate-400" />
-                    Messages
+                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <span className="font-medium">Messages</span>
                   </Link>
+
+                  <div className="my-4 border-t border-slate-100" />
+
                   <Link
                     href="/dashboard/profile"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <User className="w-5 h-5 text-slate-400" />
-                    Mon profil
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                      <User className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <span className="font-medium">Mon profil</span>
                   </Link>
                   <Link
                     href="/dashboard/settings"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 text-slate-700"
+                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <Settings className="w-5 h-5 text-slate-400" />
-                    Paramètres
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <span className="font-medium">Paramètres</span>
                   </Link>
 
-                  <div className="pt-4 border-t border-slate-100">
+                  {/* Déconnexion */}
+                  <div className="pt-6 mt-4 border-t border-slate-100">
                     <button
                       onClick={() => {
                         handleSignOut();
                         setIsOpen(false);
                       }}
-                      className="flex items-center gap-3 py-3 text-red-600 w-full"
+                      className="flex items-center gap-4 py-1.5 px-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-colors w-full"
                     >
-                      <LogOut className="w-5 h-5" />
-                      Déconnexion
+                      <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                        <LogOut className="w-5 h-5 text-red-600" />
+                      </div>
+                      <span className="font-medium">Déconnexion</span>
                     </button>
                   </div>
                 </div>
               ) : (
                 // Boutons auth (mobile)
-                <div className="pt-4 border-t border-slate-100 space-y-3">
+                <div className="space-y-4">
                   <Link
                     href="/login"
                     onClick={() => setIsOpen(false)}
-                    className="block py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                    className="flex items-center justify-center w-full py-3 border-2 border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 transition-colors"
                   >
                     Connexion
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setIsOpen(false)}
-                    className="block py-3 text-center bg-slate-900 text-white font-medium rounded-xl"
+                    className="flex items-center justify-center w-full py-3 bg-slate-900 text-white font-semibold rounded-2xl hover:bg-slate-800 transition-colors"
                   >
                     S&apos;inscrire
                   </Link>
