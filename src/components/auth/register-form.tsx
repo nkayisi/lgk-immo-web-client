@@ -63,12 +63,12 @@ export function RegisterForm() {
       const result = await signUp.email({ email, password, name });
       if (result.error) {
         if (result.error.status === 403) {
-          router.push("/verify-email");
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
           return;
         }
         setError(result.error.message || "Échec de la création du compte");
       } else {
-        router.push("/verify-email");
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err: unknown) {
       const message =
