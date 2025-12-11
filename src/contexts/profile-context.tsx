@@ -16,7 +16,6 @@ import { useSession } from "@/lib/auth-client";
 import { profileClient } from "@/lib/graphql/client";
 import {
   Profile,
-  ProfileType,
   CreateIndividualProfileInput,
   CreateBusinessProfileInput,
   UpdateIndividualProfileInput,
@@ -93,13 +92,13 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
   const needsOnboarding =
     !sessionLoading && !!session?.user && !fetching && !profile;
 
-  // Gestion des erreurs
-  useEffect(() => {
-    if (queryError) {
-      console.error("[Profile] Query error:", queryError);
-      setError(queryError.message);
-    }
-  }, [queryError]);
+  // Gestion des erreurs - utiliser useMemo pour dériver l'erreur
+  const derivedError = queryError ? queryError.message : null;
+
+  // Log l'erreur si elle existe
+  if (queryError) {
+    console.error("[Profile] Query error:", queryError);
+  }
 
   // Créer un profil individuel
   const createIndividualProfile = useCallback(
@@ -228,7 +227,7 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
   const value: ProfileContextValue = {
     profile,
     isLoading,
-    error,
+    error: error || derivedError,
     hasProfile,
     needsOnboarding,
     refetchProfile: () => refetch({ requestPolicy: "network-only" }),

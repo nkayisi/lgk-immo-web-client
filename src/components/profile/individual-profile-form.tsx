@@ -9,8 +9,6 @@ import {
   User,
   Phone,
   MapPin,
-  Calendar,
-  CreditCard,
   Loader2,
   AlertCircle,
   ArrowLeft,
@@ -18,10 +16,8 @@ import {
 } from "lucide-react";
 import {
   CreateIndividualProfileInput,
-  UpdateIndividualProfileInput,
   Gender,
   IndividualProfile,
-  getGenderLabel,
 } from "@/lib/graphql/types";
 
 interface IndividualProfileFormProps {

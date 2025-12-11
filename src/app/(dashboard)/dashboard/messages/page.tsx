@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Search,
   Send,
@@ -18,7 +18,6 @@ import {
   Smile,
   ArrowLeft,
   Building2,
-  MapPin,
   MessageSquare,
   Archive,
   Trash2,
@@ -31,7 +30,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -346,7 +344,7 @@ function MessageBubble({
     });
   };
 
-  const StatusIcon = () => {
+  const renderStatusIcon = () => {
     switch (message.status) {
       case "sent":
         return <Check className="w-3 h-3 text-slate-400" />;
@@ -410,7 +408,7 @@ function MessageBubble({
           >
             {formatTime(message.timestamp)}
           </span>
-          {isOwn && <StatusIcon />}
+          {isOwn && renderStatusIcon()}
         </div>
       </div>
     </motion.div>

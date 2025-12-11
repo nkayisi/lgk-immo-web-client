@@ -7,15 +7,11 @@ const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-passwo
 // Routes protégées (nécessitent authentification)
 const PROTECTED_ROUTES = ['/dashboard', '/profile', '/listings', '/onboarding']
 
-// Routes nécessitant un profil complet (redirection vers onboarding si pas de profil)
-const PROFILE_REQUIRED_ROUTES = ['/dashboard', '/listings', '/profile']
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route))
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route))
-  const isOnboardingRoute = pathname.startsWith('/onboarding')
   
   // Check for better-auth session cookie (with lgk_auth prefix)
   const sessionCookie = request.cookies.get('lgk_auth.session_token')

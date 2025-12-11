@@ -17,8 +17,7 @@ import {
 } from "@/components/profile";
 import { ProfileType } from "@/lib/graphql/types";
 
-type OnboardingStep =
-  | "loading"
+type FormStep =
   | "select-type"
   | "individual-form"
   | "business-form"
@@ -32,11 +31,13 @@ function OnboardingContent() {
     isLoading: profileLoading,
     createIndividualProfile,
     createBusinessProfile,
-    error,
   } = useProfile();
 
-  const [step, setStep] = useState<OnboardingStep>("loading");
+  const [formStep, setFormStep] = useState<FormStep>("select-type");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Déterminer si on est en chargement
+  const isLoading = sessionLoading || profileLoading;
 
   // Rediriger si non connecté
   useEffect(() => {
@@ -52,18 +53,11 @@ function OnboardingContent() {
     }
   }, [profileLoading, hasProfile, router]);
 
-  // Passer à l'étape de sélection une fois chargé
-  useEffect(() => {
-    if (!sessionLoading && !profileLoading && session && !hasProfile) {
-      setStep("select-type");
-    }
-  }, [sessionLoading, profileLoading, session, hasProfile]);
-
   const handleTypeSelect = (type: ProfileType) => {
     if (type === ProfileType.INDIVIDUAL) {
-      setStep("individual-form");
+      setFormStep("individual-form");
     } else {
-      setStep("business-form");
+      setFormStep("business-form");
     }
   };
 
@@ -75,7 +69,7 @@ function OnboardingContent() {
     setIsSubmitting(false);
 
     if (success) {
-      setStep("complete");
+      setFormStep("complete");
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
@@ -91,7 +85,7 @@ function OnboardingContent() {
     setIsSubmitting(false);
 
     if (success) {
-      setStep("complete");
+      setFormStep("complete");
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
@@ -100,11 +94,11 @@ function OnboardingContent() {
   };
 
   const handleBack = () => {
-    setStep("select-type");
+    setFormStep("select-type");
   };
 
   // Loading state
-  if (step === "loading" || sessionLoading || profileLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mb-4" />
@@ -114,7 +108,7 @@ function OnboardingContent() {
   }
 
   // Complete state
-  if (step === "complete") {
+  if (formStep === "complete") {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -149,7 +143,7 @@ function OnboardingContent() {
 
   return (
     <AnimatePresence mode="wait">
-      {step === "select-type" && (
+      {formStep === "select-type" && (
         <motion.div
           key="select-type"
           initial={{ opacity: 0, y: 20 }}
@@ -165,7 +159,7 @@ function OnboardingContent() {
         </motion.div>
       )}
 
-      {step === "individual-form" && (
+      {formStep === "individual-form" && (
         <motion.div
           key="individual-form"
           initial={{ opacity: 0, x: 50 }}
@@ -181,7 +175,7 @@ function OnboardingContent() {
         </motion.div>
       )}
 
-      {step === "business-form" && (
+      {formStep === "business-form" && (
         <motion.div
           key="business-form"
           initial={{ opacity: 0, x: 50 }}

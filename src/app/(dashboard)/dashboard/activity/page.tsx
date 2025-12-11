@@ -1,35 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Clock,
-  Eye,
-  Heart,
-  MessageSquare,
-  Building2,
-  Search,
-  Filter,
-  Calendar,
-  ChevronDown,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Edit3,
-  Trash2,
-  Plus,
-  ArrowUpRight,
-  ArrowDownLeft,
-  User,
-  FileText,
-  CreditCard,
-  RefreshCw,
-  Download,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -38,7 +11,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Download,
+  Edit3,
+  Eye,
+  FileText,
+  Filter,
+  Heart,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Trash2,
+  User,
+  XCircle
+} from "lucide-react";
+import { useState } from "react";
 
 // =============================================================================
 // TYPES

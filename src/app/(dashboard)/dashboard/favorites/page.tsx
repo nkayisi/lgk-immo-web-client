@@ -1,38 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import {
-  Heart,
-  HeartOff,
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Building2,
-  Home,
-  Search,
-  Filter,
-  Grid3X3,
-  List,
-  ExternalLink,
-  Trash2,
-  Phone,
-  MessageSquare,
-  Share2,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +10,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Bath,
+  Bed,
+  Building2,
+  ExternalLink,
+  Grid3X3,
+  Heart,
+  HeartOff,
+  Home,
+  List,
+  MapPin,
+  MessageSquare,
+  Phone,
+  Search,
+  Square,
+  Trash2
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 // =============================================================================
 // TYPES

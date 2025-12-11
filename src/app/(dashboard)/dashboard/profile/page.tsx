@@ -1,37 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  User,
-  Building2,
-  Phone,
-  MapPin,
-  Calendar,
-  FileText,
-  Edit3,
-  X,
-  Loader2,
-  AlertCircle,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Camera,
-  Save,
-  Shield,
-  Mail,
-  Globe,
-  CreditCard,
-  Upload,
-  Check,
-} from "lucide-react";
-import { useProfile } from "@/contexts/profile-context";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -39,19 +12,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProfile } from "@/contexts/profile-context";
+import { useSession } from "@/lib/auth-client";
 import {
-  Profile,
-  isIndividualProfile,
-  isBusinessProfile,
-  getVerificationStatusLabel,
-  VerificationStatus,
-  IndividualProfile,
   BusinessProfile,
   Gender,
   getProfileDisplayName,
+  getVerificationStatusLabel,
+  IndividualProfile,
+  isBusinessProfile,
+  isIndividualProfile,
+  Profile,
+  VerificationStatus,
 } from "@/lib/graphql/types";
-import { useSession } from "@/lib/auth-client";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
+  Building2,
+  Calendar,
+  Camera,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Edit3,
+  FileText,
+  Globe,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  Shield,
+  Upload,
+  User,
+  X,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 // =============================================================================
 // TYPES

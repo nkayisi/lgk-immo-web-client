@@ -1,46 +1,33 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/contexts/profile-context";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { useSession } from "@/lib/auth-client";
 import {
+  BusinessProfile,
+  getProfileDisplayName,
+  IndividualProfile,
+  isIndividualProfile,
+  Profile,
+  VerificationStatus,
+} from "@/lib/graphql/types";
+import { motion } from "framer-motion";
+import {
+  ArrowUpRight,
   Building2,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
   Eye,
   Heart,
   MessageSquare,
   Plus,
-  TrendingUp,
-  ArrowUpRight,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Calendar,
-  MapPin,
   Search,
+  TrendingUp,
   User,
-  FileText,
-  Settings,
-  ChevronRight,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Profile,
-  isIndividualProfile,
-  getProfileDisplayName,
-  IndividualProfile,
-  BusinessProfile,
-  VerificationStatus,
-} from "@/lib/graphql/types";
+import Link from "next/link";
 
 // =============================================================================
 // DONNÉES FICTIVES

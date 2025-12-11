@@ -1,56 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-  Edit3,
-  Trash2,
-  Power,
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Calendar,
-  TrendingUp,
-  Building2,
-  Home,
-  ChevronDown,
-  Grid3X3,
-  List,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +14,43 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Bath,
+  Bed,
+  Building2,
+  Edit3,
+  Eye,
+  Grid3X3,
+  Home,
+  List,
+  MapPin,
+  MoreVertical,
+  Plus,
+  Power,
+  RefreshCw,
+  Search,
+  Square,
+  Trash2,
+  TrendingUp
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 // =============================================================================
 // TYPES

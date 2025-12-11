@@ -6,7 +6,6 @@ import {
   Bell,
   Shield,
   Eye,
-  Globe,
   Moon,
   Sun,
   Smartphone,
@@ -22,7 +21,6 @@ import {
   Loader2,
   Monitor,
   Languages,
-  CreditCard,
   HelpCircle,
   FileText,
 } from "lucide-react";

@@ -10,7 +10,6 @@ import {
   Phone,
   MapPin,
   FileText,
-  User,
   Loader2,
   AlertCircle,
   ArrowLeft,
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 import {
   CreateBusinessProfileInput,
-  UpdateBusinessProfileInput,
   BusinessProfile,
 } from "@/lib/graphql/types";
 

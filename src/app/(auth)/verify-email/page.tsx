@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { sendVerificationEmail } from "@/lib/auth-client";
 import { Mail, ArrowLeft, Loader2, CheckCircle, RefreshCw } from "lucide-react";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -145,5 +145,28 @@ export default function VerifyEmailPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function VerifyEmailLoading() {
+  return (
+    <div className="w-full">
+      <div className="text-center">
+        <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+        </div>
+        <p className="text-slate-500">Chargement...</p>
+      </div>
+    </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailLoading />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
