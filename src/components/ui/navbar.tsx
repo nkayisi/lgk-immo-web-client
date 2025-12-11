@@ -14,6 +14,7 @@ import {
   Settings,
   User,
   X,
+  Activity,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -169,6 +170,14 @@ export function Navbar() {
                           <span>Tableau de bord</span>
                         </Link>
                         <Link
+                          href="/dashboard/activity"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <Activity className="w-4 h-4 text-slate-400" />
+                          <span>Activités</span>
+                        </Link>
+                        <Link
                           href="/dashboard/properties"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
@@ -247,188 +256,218 @@ export function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen(true)}
             className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <Menu className="w-5 h-5" />
           </button>
         </div>
       </div>
 
+      {/* Lock body scroll when menu is open */}
+      {isOpen && (
+        <style jsx global>{`
+          body {
+            overflow: hidden;
+          }
+        `}</style>
+      )}
+
       {/* Mobile Menu - Fullscreen */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="md:hidden fixed inset-0 z-50 bg-white"
-          >
-            {/* Header avec bouton fermer */}
-            <div className="flex items-center justify-between px-4 h-20 border-b border-slate-100">
-              <Link
-                href="/"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                  <span className="text-white font-bold text-lg">L</span>
-                </div>
-                <span className="font-semibold text-xl text-slate-900">
-                  LGK<span className="text-emerald-500">.</span>
-                </span>
-              </Link>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Menu Content - Scrollable */}
-            <div className="bg-white overflow-y-auto h-[calc(100vh-5rem)] px-6 py-8">
-              {/* Ajouter un bien - CTA principal */}
-              <Link
-                href="/dashboard/properties/new"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-2xl shadow-lg shadow-emerald-500/20 mb-8"
-              >
-                <Plus className="w-5 h-5" />
-                Deposer une annonce
-              </Link>
-
-              {user ? (
-                // Menu utilisateur connecté (mobile)
-                <div className="space-y-2">
-                  {/* User Info Card */}
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl mb-6">
-                    {user.image ? (
-                      <Image
-                        src={user.image}
-                        alt={user.name || "Avatar"}
-                        width={56}
-                        height={56}
-                        className="w-14 h-14 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-xl font-medium">
-                        {getInitials(user.name)}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-lg text-slate-900 truncate">
-                        {user.name}
-                      </p>
-                      <p className="text-sm text-slate-500 truncate">
-                        {user.email}
-                      </p>
-                    </div>
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="md:hidden fixed inset-0 z-40 bg-black"
+            />
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: "-100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="md:hidden fixed inset-y-0 left-0 z-50 bg-white w-[75%] max-w-[280px] shadow-2xl"
+            >
+              {/* Header avec bouton fermer */}
+              <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100">
+                <Link
+                  href="/"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md shadow-emerald-500/20">
+                    <span className="text-white font-bold text-sm">L</span>
                   </div>
+                  <span className="font-semibold text-lg text-slate-900">
+                    LGK<span className="text-emerald-500">.</span>
+                  </span>
+                </Link>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-                  {/* Navigation Links */}
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                      <LayoutDashboard className="w-5 h-5 text-emerald-600" />
-                    </div>
-                    <span className="font-medium">Tableau de bord</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/properties"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <span className="font-medium">Mes annonces</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/favorites"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-pink-600" />
-                    </div>
-                    <span className="font-medium">Favoris</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/messages"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <span className="font-medium">Messages</span>
-                  </Link>
+              {/* Menu Content - Scrollable */}
+              <div className="bg-white overflow-y-auto h-[calc(100vh-4rem)] px-4 py-5">
+                {/* Ajouter un bien - CTA principal */}
+                <Link
+                  href="/dashboard/properties/new"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-xl shadow-md shadow-emerald-500/20 mb-5"
+                >
+                  <Plus className="w-4 h-4" />
+                  Deposer une annonce
+                </Link>
 
-                  <div className="my-4 border-t border-slate-100" />
-
-                  <Link
-                    href="/dashboard/profile"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                      <User className="w-5 h-5 text-slate-600" />
+                {user ? (
+                  // Menu utilisateur connecté (mobile)
+                  <div className="space-y-0.5">
+                    {/* User Info Card */}
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl mb-4">
+                      {user.image ? (
+                        <Image
+                          src={user.image}
+                          alt={user.name || "Avatar"}
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-sm font-medium">
+                          {getInitials(user.name)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-slate-900 truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
-                    <span className="font-medium">Mon profil</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-4 py-1.5 px-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                      <Settings className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <span className="font-medium">Paramètres</span>
-                  </Link>
 
-                  {/* Déconnexion */}
-                  <div className="pt-6 mt-4 border-t border-slate-100">
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setIsOpen(false);
-                      }}
-                      className="flex items-center gap-4 py-1.5 px-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-colors w-full"
+                    {/* Navigation Links */}
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                        <LogOut className="w-5 h-5 text-red-600" />
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                        <LayoutDashboard className="w-4 h-4 text-emerald-600" />
                       </div>
-                      <span className="font-medium">Déconnexion</span>
-                    </button>
+                      <span className="text-sm">Tableau de bord</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/activity"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <span className="text-sm">Activités</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/properties"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <Building2 className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <span className="text-sm">Mes annonces</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/favorites"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center">
+                        <Heart className="w-4 h-4 text-pink-600" />
+                      </div>
+                      <span className="text-sm">Favoris</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/messages"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                        <MessageSquare className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <span className="text-sm">Messages</span>
+                    </Link>
+
+                    <div className="my-3 border-t border-slate-100" />
+
+                    <Link
+                      href="/dashboard/profile"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <User className="w-4 h-4 text-slate-600" />
+                      </div>
+                      <span className="text-sm">Mon profil</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                        <Settings className="w-4 h-4 text-slate-600" />
+                      </div>
+                      <span className="text-sm">Paramètres</span>
+                    </Link>
+
+                    {/* Déconnexion */}
+                    <div className="pt-4 mt-3 border-t border-slate-100">
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center gap-3 py-2 px-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+                          <LogOut className="w-4 h-4 text-red-600" />
+                        </div>
+                        <span className="text-sm">Déconnexion</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                // Boutons auth (mobile)
-                <div className="space-y-4">
-                  <Link
-                    href="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center w-full py-3 border-2 border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 transition-colors"
-                  >
-                    Connexion
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center w-full py-3 bg-slate-900 text-white font-semibold rounded-2xl hover:bg-slate-800 transition-colors"
-                  >
-                    S&apos;inscrire
-                  </Link>
-                </div>
-              )}
-            </div>
-          </motion.div>
+                ) : (
+                  // Boutons auth (mobile)
+                  <div className="space-y-3">
+                    <Link
+                      href="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-center w-full py-2.5 text-sm border-2 border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors"
+                    >
+                      Connexion
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-center w-full py-2.5 text-sm bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors"
+                    >
+                      S&apos;inscrire
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.nav>
