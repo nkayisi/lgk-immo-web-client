@@ -1,35 +1,15 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./prisma"
-import nodemailer from "nodemailer"
+import { Resend } from "resend"
 
-// Configuration du transporteur SMTP avec options robustes
-const smtpPort = parseInt(process.env.SMTP_PORT || "587")
-const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
+// Configuration Resend pour l'envoi d'emails (fonctionne sur Vercel)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: smtpPort,
-  secure: isSecure,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  // Options de connexion robustes
-  connectionTimeout: 10000, // 10 secondes
-  greetingTimeout: 10000,
-  socketTimeout: 30000, // 30 secondes pour l'envoi
-  // TLS options
-  tls: {
-    rejectUnauthorized: false, // Accepter les certificats auto-signés en dev
-    minVersion: "TLSv1.2",
-  },
-  // Debug en développement
-  debug: process.env.NODE_ENV === "development",
-  logger: process.env.NODE_ENV === "development",
-})
+// Email d'envoi (doit être vérifié sur Resend)
+const EMAIL_FROM = process.env.EMAIL_FROM || "LGK Immo <onboarding@resend.dev>"
 
-// Fonction d'envoi d'email avec gestion d'erreur
+// Fonction d'envoi d'email avec Resend
 async function sendEmail({
   to,
   subject,
@@ -40,18 +20,22 @@ async function sendEmail({
   html: string
 }) {
   try {
-    const info = await transporter.sendMail({
-      from: `"LGK Immo" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: [to],
       subject,
       html,
     })
-    console.log(`[Email] Envoyé à ${to}: ${info.messageId}`)
-    return info
+
+    if (error) {
+      console.error(`[Email] Erreur Resend pour ${to}:`, error)
+      throw new Error(error.message)
+    }
+
+    console.log(`[Email] Envoyé à ${to}: ${data?.id}`)
+    return data
   } catch (error) {
     console.error(`[Email] Erreur d'envoi à ${to}:`, error)
-    // Ne pas bloquer l'inscription si l'email échoue
-    // L'utilisateur pourra demander un renvoi
     throw error
   }
 }

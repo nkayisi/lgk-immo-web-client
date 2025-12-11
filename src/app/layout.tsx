@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LGK Immo - Authentification",
+  title: "LGK Immo",
   description: "Plateforme immobilière LGK",
 };
 
