@@ -1,16 +1,19 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./prisma"
-import { Resend } from "resend"
 
-// Configuration Resend pour l'envoi d'emails (fonctionne sur Vercel)
-const resend = new Resend(process.env.RESEND_API_KEY)
+// URL de base de l'application (pour les appels API internes)
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-// Email d'envoi (doit être vérifié sur Resend)
-const EMAIL_FROM = process.env.EMAIL_FROM || "LGK Immo <onboarding@resend.dev>"
+// Clé secrète pour sécuriser les appels internes à l'API d'envoi d'email
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET || process.env.BETTER_AUTH_SECRET
 
-// Fonction d'envoi d'email avec Resend
-async function sendEmail({
+/**
+ * Envoie un email via l'API Route /api/send-email.
+ * Cette approche permet d'éviter les problèmes d'Edge Runtime sur Vercel
+ * car Resend nécessite un runtime Node.js.
+ */
+async function sendEmailViaAPI({
   to,
   subject,
   html,
@@ -18,25 +21,33 @@ async function sendEmail({
   to: string
   subject: string
   html: string
-}) {
+}): Promise<void> {
   try {
-    const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
-      to: [to],
-      subject,
-      html,
+    const response = await fetch(`${APP_URL}/api/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to,
+        subject,
+        html,
+        internalSecret: INTERNAL_API_SECRET,
+      }),
     })
 
-    if (error) {
-      console.error(`[Email] Erreur Resend pour ${to}:`, error)
-      throw new Error(error.message)
+    const result = await response.json()
+
+    if (!response.ok || !result.success) {
+      console.error(`[Auth Email] Erreur d'envoi à ${to}:`, result.error)
+      throw new Error(result.error || "Failed to send email")
     }
 
-    console.log(`[Email] Envoyé à ${to}: ${data?.id}`)
-    return data
+    console.log(`[Auth Email] Email envoyé à ${to}: ${result.messageId}`)
   } catch (error) {
-    console.error(`[Email] Erreur d'envoi à ${to}:`, error)
-    throw error
+    console.error(`[Auth Email] Erreur d'envoi à ${to}:`, error)
+    // Ne pas propager l'erreur pour ne pas bloquer l'inscription/reset
+    // L'utilisateur pourra redemander l'email
   }
 }
 
@@ -50,7 +61,7 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       // Utiliser void pour ne pas bloquer si l'email échoue
-      void sendEmail({
+      void sendEmailViaAPI({
         to: user.email,
         subject: "Réinitialisation de votre mot de passe - LGK Immo",
         html: `
@@ -97,7 +108,7 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       // Utiliser void pour ne pas bloquer l'inscription si l'email échoue
-      void sendEmail({
+      void sendEmailViaAPI({
         to: user.email,
         subject: "Vérifiez votre adresse email - LGK Immo",
         html: `
