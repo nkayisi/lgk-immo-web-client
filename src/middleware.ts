@@ -14,7 +14,9 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route))
   
   // Check for better-auth session cookie (with lgk_auth prefix)
-  const sessionCookie = request.cookies.get('lgk_auth.session_token')
+  // En production avec useSecureCookies: true, le cookie a le préfixe __Secure-
+  const sessionCookie = request.cookies.get('lgk_auth.session_token') 
+    || request.cookies.get('__Secure-lgk_auth.session_token')
   const isAuthenticated = !!sessionCookie
   
   // Redirect authenticated users away from auth pages (except verify-email)

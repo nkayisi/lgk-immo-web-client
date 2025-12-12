@@ -53,7 +53,9 @@ async function sendEmailViaAPI({
 
 export const auth = betterAuth({
   trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"  ],
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    "https://lgk-immo.nkayisi.com",
+  ],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -176,6 +178,10 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: "lgk_auth",
     useSecureCookies: process.env.NODE_ENV === "production",
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: process.env.NODE_ENV === "production" ? ".nkayisi.com" : undefined,
+    },
   },
 
   // Permettre de lier plusieurs providers au même compte (même email)
