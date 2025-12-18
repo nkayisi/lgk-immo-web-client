@@ -17,14 +17,12 @@ import {
 import {
   CreateIndividualProfileInput,
   Gender,
-  IndividualProfile,
-} from "@/lib/graphql/types";
+  type Profile,
+} from "@/lib/profile/types";
 
 interface IndividualProfileFormProps {
-  initialData?: IndividualProfile;
-  onSubmit: (
-    data: Omit<CreateIndividualProfileInput, "externalUserId">
-  ) => Promise<boolean>;
+  initialData?: Profile;
+  onSubmit: (data: CreateIndividualProfileInput) => Promise<boolean>;
   onBack?: () => void;
   isEditing?: boolean;
   onSkipAll?: () => void;
@@ -45,15 +43,18 @@ export function IndividualProfileForm({
   onSkipAll,
 }: IndividualProfileFormProps) {
   const [formData, setFormData] = useState({
-    firstName: initialData?.firstName || "",
-    lastName: initialData?.lastName || "",
+    fullName: initialData?.individualProfile?.fullName || "",
     phoneNumber: initialData?.phoneNumber || "",
     country: initialData?.country || "RDC",
     city: initialData?.city || "",
     address: initialData?.address || "",
-    dateOfBirth: initialData?.dateOfBirth || "",
-    gender: initialData?.gender || "",
-    nationalIdNumber: initialData?.nationalIdNumber || "",
+    dateOfBirth: initialData?.individualProfile?.dateOfBirth
+      ? new Date(initialData.individualProfile.dateOfBirth)
+          .toISOString()
+          .split("T")[0]
+      : "",
+    gender: initialData?.individualProfile?.gender || "",
+    nationalIdNumber: initialData?.individualProfile?.nationalIdNumber || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -82,8 +83,7 @@ export function IndividualProfileForm({
 
     try {
       const submitData: Omit<CreateIndividualProfileInput, "externalUserId"> = {
-        firstName: formData.firstName || undefined,
-        lastName: formData.lastName || undefined,
+        fullName: formData.fullName || undefined,
         phoneNumber: formData.phoneNumber || undefined,
         country: formData.country || undefined,
         city: formData.city || undefined,
@@ -119,7 +119,7 @@ export function IndividualProfileForm({
   const canProceed = () => {
     switch (currentStep) {
       case 0:
-        return formData.firstName && formData.lastName;
+        return formData.fullName.trim().length > 0;
       case 1:
         return true;
       case 2:
@@ -136,16 +136,15 @@ export function IndividualProfileForm({
   };
 
   const handleContinueLater = async () => {
-    if (!formData.firstName || !formData.lastName) {
-      setError("Veuillez renseigner au moins votre prénom et nom.");
+    if (!formData.fullName || formData.fullName.trim().length === 0) {
+      setError("Veuillez renseigner votre nom complet.");
       return;
     }
     setError(null);
     setIsLoading(true);
     try {
       const submitData: Omit<CreateIndividualProfileInput, "externalUserId"> = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        fullName: formData.fullName,
         phoneNumber: formData.phoneNumber || undefined,
         country: formData.country || undefined,
         city: formData.city || undefined,
@@ -307,35 +306,19 @@ export function IndividualProfileForm({
           {/* Step 0: Identity */}
           {currentStep === 0 && (
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Prénom <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
-                    placeholder="Jean"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Nom <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
-                    placeholder="Kabongo"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Nom complet <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                  placeholder="Jean Kabongo"
+                />
               </div>
 
               <div>
@@ -533,7 +516,7 @@ export function IndividualProfileForm({
                 type="button"
                 onClick={handleContinueLater}
                 disabled={
-                  isLoading || !formData.firstName || !formData.lastName
+                  isLoading || !formData.fullName
                 }
                 className="text-sm text-slate-500 hover:text-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

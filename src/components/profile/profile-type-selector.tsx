@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Building2, ArrowRight, Check } from "lucide-react";
-import { ProfileType } from "@/lib/graphql/types";
+import { ProfileType } from "@/lib/profile/types";
 
 interface ProfileTypeSelectorProps {
   onSelect: (type: ProfileType) => void;

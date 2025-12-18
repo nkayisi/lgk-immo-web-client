@@ -37,7 +37,7 @@ export function CTASection() {
                 Explorer les biens
               </Link>
               <Link
-                href="/register"
+                href="/get-started"
                 className="w-full sm:w-auto px-8 py-4 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 transition-colors"
               >
                 Créer un compte

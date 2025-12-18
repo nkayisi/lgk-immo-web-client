@@ -7,10 +7,12 @@ import { ProfileProvider, useProfile } from "@/contexts/profile-context";
 import { Navbar } from "@/components/ui/navbar";
 import { Loader2 } from "lucide-react";
 import { Footer } from "@/components/ui/footer";
+import { ensureProfileAction } from "@/lib/profile/ensure-profile";
+import { ProfileType } from "@prisma/client";
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { data: session, isPending: sessionLoading } = useSession();
-  const { isLoading: profileLoading, needsOnboarding } = useProfile();
+  const { isLoading: profileLoading, profile, refreshProfile } = useProfile();
   const router = useRouter();
 
   // Rediriger si non connecté
@@ -20,12 +22,31 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [sessionLoading, session, router]);
 
-  // Rediriger vers onboarding si pas de profil
+  // S'assurer que l'utilisateur a un profil (important pour OAuth)
   useEffect(() => {
-    if (!profileLoading && needsOnboarding) {
-      router.push("/onboarding");
+    if (!sessionLoading && !profileLoading && session?.user && !profile) {
+      // Récupérer le type de profil depuis sessionStorage (pour OAuth)
+      const pendingType = sessionStorage.getItem("pendingProfileType");
+      let profileType: ProfileType | undefined = undefined;
+
+      if (pendingType === "INDIVIDUAL") {
+        profileType = ProfileType.INDIVIDUAL;
+        sessionStorage.removeItem("pendingProfileType");
+      } else if (pendingType === "BUSINESS") {
+        profileType = ProfileType.BUSINESS;
+        sessionStorage.removeItem("pendingProfileType");
+      }
+
+      // Créer automatiquement un profil si manquant
+      ensureProfileAction({
+        userId: session.user.id,
+        email: session.user.email,
+        profileType,
+      }).then(() => {
+        refreshProfile();
+      });
     }
-  }, [profileLoading, needsOnboarding, router]);
+  }, [sessionLoading, profileLoading, session, profile, refreshProfile]);
 
   const isLoading = sessionLoading || profileLoading;
 

@@ -15,16 +15,11 @@ import {
   ArrowLeft,
   Check,
 } from "lucide-react";
-import {
-  CreateBusinessProfileInput,
-  BusinessProfile,
-} from "@/lib/graphql/types";
+import { CreateBusinessProfileInput, type Profile } from "@/lib/profile/types";
 
 interface BusinessProfileFormProps {
-  initialData?: BusinessProfile;
-  onSubmit: (
-    data: Omit<CreateBusinessProfileInput, "externalUserId">
-  ) => Promise<boolean>;
+  initialData?: Profile;
+  onSubmit: (data: CreateBusinessProfileInput) => Promise<boolean>;
   onBack?: () => void;
   isEditing?: boolean;
   onSkipAll?: () => void;
@@ -38,10 +33,11 @@ export function BusinessProfileForm({
   onSkipAll,
 }: BusinessProfileFormProps) {
   const [formData, setFormData] = useState({
-    businessName: initialData?.businessName || "",
-    registrationNumber: initialData?.registrationNumber || "",
-    taxId: initialData?.taxId || "",
-    legalRepresentativeName: initialData?.legalRepresentativeName || "",
+    businessName: initialData?.businessProfile?.businessName || "",
+    registrationNumber: initialData?.businessProfile?.registrationNumber || "",
+    taxId: initialData?.businessProfile?.taxId || "",
+    legalRepresentativeName:
+      initialData?.businessProfile?.legalRepresentativeName || "",
     phoneNumber: initialData?.phoneNumber || "",
     country: initialData?.country || "RDC",
     city: initialData?.city || "",

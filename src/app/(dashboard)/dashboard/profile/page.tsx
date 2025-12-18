@@ -16,16 +16,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/contexts/profile-context";
 import { useSession } from "@/lib/auth-client";
 import {
-  BusinessProfile,
   Gender,
   getProfileDisplayName,
   getVerificationStatusLabel,
-  IndividualProfile,
   isBusinessProfile,
   isIndividualProfile,
-  Profile,
+  type Profile,
   VerificationStatus,
-} from "@/lib/graphql/types";
+  calculateProfileCompletion,
+} from "@/lib/profile/types";
+import { ProfileSwitcher } from "@/components/profile/profile-switcher";
+import { ProfileRolesManager } from "@/components/profile/profile-roles-manager";
+import { AddProfileModal } from "@/components/profile/add-profile-modal";
+import { ProfileType } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -48,6 +51,8 @@ import {
   User,
   X,
   XCircle,
+  Users,
+  BadgeCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -155,8 +160,40 @@ function EditableSection({
   };
 
   const getFieldValue = (field: string): string | null | undefined => {
-    const p = profile as unknown as Record<string, unknown>;
-    return p[field] as string | null | undefined;
+    // Check base profile fields first
+    const profileRecord = profile as unknown as Record<string, unknown>;
+    if (field in profileRecord) {
+      const value = profileRecord[field];
+      if (value instanceof Date) {
+        return value.toISOString().split("T")[0];
+      }
+      return value as string | null | undefined;
+    }
+    // Check individual profile fields
+    if (profile.individualProfile) {
+      const indRecord = profile.individualProfile as unknown as Record<
+        string,
+        unknown
+      >;
+      if (field in indRecord) {
+        const value = indRecord[field];
+        if (value instanceof Date) {
+          return value.toISOString().split("T")[0];
+        }
+        return value as string | null | undefined;
+      }
+    }
+    // Check business profile fields
+    if (profile.businessProfile) {
+      const busRecord = profile.businessProfile as unknown as Record<
+        string,
+        unknown
+      >;
+      if (field in busRecord) {
+        return busRecord[field] as string | null | undefined;
+      }
+    }
+    return undefined;
   };
 
   return (
@@ -319,7 +356,7 @@ function EditableSection({
   );
 }
 
-function DocumentsSection({ profile }: { profile: IndividualProfile }) {
+function DocumentsSection({ profile }: { profile: Profile }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -384,7 +421,16 @@ function ProfileHeader({ profile }: { profile: Profile }) {
   const isIndividual = isIndividualProfile(profile);
   const displayName = getProfileDisplayName(profile);
   const verificationStatus =
-    profile.verifications?.[0]?.status || VerificationStatus.PENDING;
+    profile.profileVerifications?.[0]?.status || VerificationStatus.PENDING;
+
+  // Debug logging
+  console.log("ProfileHeader Debug:", {
+    profileType: profile.profileType,
+    hasIndividualProfile: !!profile.individualProfile,
+    hasBusinessProfile: !!profile.businessProfile,
+    isIndividual,
+    displayName,
+  });
 
   const getStatusConfig = () => {
     switch (verificationStatus) {
@@ -479,12 +525,11 @@ function IndividualProfileTabs({
   profile,
   updateProfile,
 }: {
-  profile: IndividualProfile;
+  profile: Profile;
   updateProfile: (data: Record<string, string>) => Promise<boolean>;
 }) {
   const identityFields: FieldConfig[] = [
-    { field: "firstName", label: "Prénom", icon: User },
-    { field: "lastName", label: "Nom", icon: User },
+    { field: "fullName", label: "Nom complet", icon: User },
     {
       field: "dateOfBirth",
       label: "Date de naissance",
@@ -583,7 +628,7 @@ function BusinessProfileTabs({
   profile,
   updateProfile,
 }: {
-  profile: BusinessProfile;
+  profile: Profile;
   updateProfile: (data: Record<string, string>) => Promise<boolean>;
 }) {
   const businessFields: FieldConfig[] = [
@@ -691,7 +736,20 @@ function BusinessProfileTabs({
 // =============================================================================
 
 export default function ProfilePage() {
-  const { profile, isLoading, error, updateProfile } = useProfile();
+  const { profile, profiles, isLoading, error, updateProfile } = useProfile();
+  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
+  const [selectedProfileType, setSelectedProfileType] =
+    useState<ProfileType | null>(null);
+
+  const existingTypes = profiles.map((p) => p.profileType);
+  const canAddProfile = profiles.length < 2;
+
+  const handleAddProfile = (type: ProfileType) => {
+    setSelectedProfileType(type);
+    setShowAddProfileModal(false);
+    // Redirect to onboarding with the selected type
+    window.location.href = `/onboarding?type=${type.toLowerCase()}&add=true`;
+  };
 
   if (isLoading) {
     return (
@@ -733,6 +791,32 @@ export default function ProfilePage() {
         {/* Header */}
         <ProfileHeader profile={profile} />
 
+        {/* Profile Management Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Mes profils ({profiles.length})
+              </CardTitle>
+              {canAddProfile && (
+                <Button
+                  onClick={() => setShowAddProfileModal(true)}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Ajouter un profil
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ProfileSwitcher variant="list" />
+          </CardContent>
+        </Card>
+
         {/* Profile Tabs */}
         {isIndividualProfile(profile) ? (
           <IndividualProfileTabs
@@ -745,6 +829,58 @@ export default function ProfilePage() {
             updateProfile={updateProfile}
           />
         ) : null}
+
+        {/* Profile Roles Manager */}
+        <Card>
+          <CardContent className="p-6">
+            <ProfileRolesManager profile={profile} />
+          </CardContent>
+        </Card>
+
+        {/* Certification Status */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  profile.isCertified ? "bg-emerald-100" : "bg-amber-100"
+                }`}
+              >
+                <BadgeCheck
+                  className={`w-6 h-6 ${
+                    profile.isCertified ? "text-emerald-600" : "text-amber-600"
+                  }`}
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-900">
+                  {profile.isCertified
+                    ? "Profil certifié"
+                    : "Profil non certifié"}
+                </h3>
+                <p className="text-sm text-slate-500">
+                  {profile.isCertified
+                    ? "Votre profil est complet et vérifié. Vous bénéficiez d'une meilleure visibilité."
+                    : `Complétez votre profil à 100% pour obtenir la certification. Progression: ${calculateProfileCompletion(
+                        profile
+                      )}%`}
+                </p>
+              </div>
+              {!profile.isCertified && (
+                <div className="w-24">
+                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
+                      style={{
+                        width: `${calculateProfileCompletion(profile)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Security Section */}
         <Card>
@@ -768,6 +904,14 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfileModal}
+        onClose={() => setShowAddProfileModal(false)}
+        onSelectType={handleAddProfile}
+        existingTypes={existingTypes}
+      />
     </div>
   );
 }

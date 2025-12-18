@@ -52,6 +52,7 @@ async function sendEmailViaAPI({
 }
 
 export const auth = betterAuth({
+  baseURL: APP_URL,
   trustedOrigins: [
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     "https://lgk-immo.nkayisi.com",

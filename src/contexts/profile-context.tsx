@@ -2,7 +2,7 @@
 
 /**
  * Contexte React pour la gestion du profil utilisateur.
- * Fournit l'état du profil et les méthodes de manipulation.
+ * Utilise les Server Actions pour la communication avec la base de données.
  */
 import React, {
   createContext,
@@ -10,26 +10,28 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useTransition,
 } from "react";
-import { Provider as UrqlProvider, useQuery, useMutation } from "urql";
 import { useSession } from "@/lib/auth-client";
-import { profileClient } from "@/lib/graphql/client";
 import {
-  Profile,
-  CreateIndividualProfileInput,
-  CreateBusinessProfileInput,
-  UpdateIndividualProfileInput,
-  UpdateBusinessProfileInput,
+  type Profile,
+  type CreateIndividualProfileInput,
+  type CreateBusinessProfileInput,
+  type UpdateIndividualProfileInput,
+  type UpdateBusinessProfileInput,
+  ProfileType,
   isIndividualProfile,
   isBusinessProfile,
-} from "@/lib/graphql/types";
+} from "@/lib/profile/types";
 import {
-  GET_PROFILE_BY_USER,
-  CREATE_INDIVIDUAL_PROFILE,
-  CREATE_BUSINESS_PROFILE,
-  UPDATE_INDIVIDUAL_PROFILE,
-  UPDATE_BUSINESS_PROFILE,
-} from "@/lib/graphql/profile-operations";
+  getActiveProfile,
+  getUserProfiles,
+  createIndividualProfile as createIndividualAction,
+  createBusinessProfile as createBusinessAction,
+  updateIndividualProfile as updateIndividualAction,
+  updateBusinessProfile as updateBusinessAction,
+  switchActiveProfile as switchProfileAction,
+} from "@/lib/profile/actions";
 
 // =============================================================================
 // TYPES
@@ -38,22 +40,25 @@ import {
 interface ProfileContextValue {
   // État
   profile: Profile | null;
+  profiles: Profile[];
   isLoading: boolean;
   error: string | null;
   hasProfile: boolean;
   needsOnboarding: boolean;
 
   // Actions
-  refetchProfile: () => void;
+  refetchProfile: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   createIndividualProfile: (
-    input: Omit<CreateIndividualProfileInput, "externalUserId">
+    input: CreateIndividualProfileInput
   ) => Promise<boolean>;
   createBusinessProfile: (
-    input: Omit<CreateBusinessProfileInput, "externalUserId">
+    input: CreateBusinessProfileInput
   ) => Promise<boolean>;
   updateProfile: (
     input: UpdateIndividualProfileInput | UpdateBusinessProfileInput
   ) => Promise<boolean>;
+  switchProfile: (profileId: string) => Promise<boolean>;
 
   // Helpers
   isIndividual: boolean;
@@ -63,109 +68,110 @@ interface ProfileContextValue {
 const ProfileContext = createContext<ProfileContextValue | null>(null);
 
 // =============================================================================
-// PROVIDER INTERNE (avec urql hooks)
+// PROVIDER
 // =============================================================================
 
-function ProfileProviderInner({ children }: { children: React.ReactNode }) {
+export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending: sessionLoading } = useSession();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
   const userId = session?.user?.id;
 
-  // Query pour récupérer le profil
-  const [{ data, fetching, error: queryError }, refetch] = useQuery({
-    query: GET_PROFILE_BY_USER,
-    variables: { externalUserId: userId },
-    pause: !userId,
-  });
+  // Charger les profils au montage et quand l'utilisateur change
+  const loadProfiles = useCallback(async () => {
+    if (!userId) {
+      setProfile(null);
+      setProfiles([]);
+      setIsLoadingProfiles(false);
+      return;
+    }
 
-  // Mutations
-  const [, createIndividualMutation] = useMutation(CREATE_INDIVIDUAL_PROFILE);
-  const [, createBusinessMutation] = useMutation(CREATE_BUSINESS_PROFILE);
-  const [, updateIndividualMutation] = useMutation(UPDATE_INDIVIDUAL_PROFILE);
-  const [, updateBusinessMutation] = useMutation(UPDATE_BUSINESS_PROFILE);
+    setIsLoadingProfiles(true);
+    setError(null);
+
+    try {
+      const [activeResult, allResult] = await Promise.all([
+        getActiveProfile(),
+        getUserProfiles(),
+      ]);
+
+      if (activeResult.success && activeResult.profile) {
+        setProfile(activeResult.profile);
+      } else {
+        setProfile(null);
+      }
+
+      if (allResult.success) {
+        setProfiles(allResult.profiles);
+      }
+    } catch (err) {
+      console.error("[Profile] Error loading profiles:", err);
+      setError("Erreur lors du chargement des profils");
+    } finally {
+      setIsLoadingProfiles(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!sessionLoading) {
+      loadProfiles();
+    }
+  }, [sessionLoading, loadProfiles]);
 
   // État dérivé
-  const profile = data?.profileByUser as Profile | null;
-  const isLoading = sessionLoading || fetching;
-  const hasProfile = !!profile;
+  const isLoading = sessionLoading || isLoadingProfiles || isPending;
+  const hasProfile = profiles.length > 0;
   const needsOnboarding =
-    !sessionLoading && !!session?.user && !fetching && !profile;
-
-  // Gestion des erreurs - utiliser useMemo pour dériver l'erreur
-  const derivedError = queryError ? queryError.message : null;
-
-  // Log l'erreur si elle existe
-  if (queryError) {
-    console.error("[Profile] Query error:", queryError);
-  }
+    !sessionLoading && !!session?.user && !isLoadingProfiles && !hasProfile;
 
   // Créer un profil individuel
   const createIndividualProfile = useCallback(
-    async (
-      input: Omit<CreateIndividualProfileInput, "externalUserId">
-    ): Promise<boolean> => {
-      if (!userId) {
-        setError("Utilisateur non connecté");
-        return false;
-      }
-
+    async (input: CreateIndividualProfileInput): Promise<boolean> => {
       setError(null);
-      const result = await createIndividualMutation({
-        input: { ...input, externalUserId: userId },
+
+      return new Promise((resolve) => {
+        startTransition(async () => {
+          const result = await createIndividualAction(input);
+
+          if (!result.success) {
+            setError(result.message);
+            resolve(false);
+            return;
+          }
+
+          await loadProfiles();
+          resolve(true);
+        });
       });
-
-      if (result.error) {
-        setError(result.error.message);
-        return false;
-      }
-
-      if (!result.data?.createIndividualProfile?.success) {
-        setError(
-          result.data?.createIndividualProfile?.message ||
-            "Erreur lors de la création"
-        );
-        return false;
-      }
-
-      refetch({ requestPolicy: "network-only" });
-      return true;
     },
-    [userId, createIndividualMutation, refetch]
+    [loadProfiles]
   );
 
   // Créer un profil business
   const createBusinessProfile = useCallback(
-    async (
-      input: Omit<CreateBusinessProfileInput, "externalUserId">
-    ): Promise<boolean> => {
-      if (!userId) {
-        setError("Utilisateur non connecté");
-        return false;
-      }
-
+    async (input: CreateBusinessProfileInput): Promise<boolean> => {
       setError(null);
-      const result = await createBusinessMutation({
-        input: { ...input, externalUserId: userId },
+
+      return new Promise((resolve) => {
+        startTransition(async () => {
+          const result = await createBusinessAction(input);
+
+          if (!result.success) {
+            setError(result.message);
+            resolve(false);
+            return;
+          }
+
+          await loadProfiles();
+          resolve(true);
+        });
       });
-
-      if (result.error) {
-        setError(result.error.message);
-        return false;
-      }
-
-      if (!result.data?.createBusinessProfile?.success) {
-        setError(
-          result.data?.createBusinessProfile?.message ||
-            "Erreur lors de la création"
-        );
-        return false;
-      }
-
-      refetch({ requestPolicy: "network-only" });
-      return true;
     },
-    [userId, createBusinessMutation, refetch]
+    [loadProfiles]
   );
 
   // Mettre à jour le profil
@@ -180,60 +186,83 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
 
       setError(null);
 
-      if (isIndividualProfile(profile)) {
-        const result = await updateIndividualMutation({
-          id: profile.id,
-          input: input as UpdateIndividualProfileInput,
+      return new Promise((resolve) => {
+        startTransition(async () => {
+          let result;
+
+          if (profile.profileType === ProfileType.INDIVIDUAL) {
+            result = await updateIndividualAction(
+              profile.id,
+              input as UpdateIndividualProfileInput
+            );
+          } else {
+            result = await updateBusinessAction(
+              profile.id,
+              input as UpdateBusinessProfileInput
+            );
+          }
+
+          if (!result.success) {
+            setError(result.message);
+            resolve(false);
+            return;
+          }
+
+          if (result.profile) {
+            setProfile(result.profile);
+            setProfiles((prev) =>
+              prev.map((p) =>
+                p.id === result.profile!.id ? result.profile! : p
+              )
+            );
+          }
+
+          resolve(true);
         });
-
-        if (result.error) {
-          setError(result.error.message);
-          return false;
-        }
-
-        if (!result.data?.updateIndividualProfile?.success) {
-          setError(
-            result.data?.updateIndividualProfile?.message ||
-              "Erreur lors de la mise à jour"
-          );
-          return false;
-        }
-      } else if (isBusinessProfile(profile)) {
-        const result = await updateBusinessMutation({
-          id: profile.id,
-          input: input as UpdateBusinessProfileInput,
-        });
-
-        if (result.error) {
-          setError(result.error.message);
-          return false;
-        }
-
-        if (!result.data?.updateBusinessProfile?.success) {
-          setError(
-            result.data?.updateBusinessProfile?.message ||
-              "Erreur lors de la mise à jour"
-          );
-          return false;
-        }
-      }
-
-      refetch({ requestPolicy: "network-only" });
-      return true;
+      });
     },
-    [profile, updateIndividualMutation, updateBusinessMutation, refetch]
+    [profile]
+  );
+
+  // Changer de profil actif
+  const switchProfile = useCallback(
+    async (profileId: string): Promise<boolean> => {
+      setError(null);
+
+      return new Promise((resolve) => {
+        startTransition(async () => {
+          const result = await switchProfileAction(profileId);
+
+          if (!result.success) {
+            setError(result.message);
+            resolve(false);
+            return;
+          }
+
+          if (result.profile) {
+            setProfile(result.profile);
+          }
+
+          resolve(true);
+        });
+      });
+    },
+    []
   );
 
   const value: ProfileContextValue = {
     profile,
+    profiles,
     isLoading,
-    error: error || derivedError,
+    error,
     hasProfile,
     needsOnboarding,
-    refetchProfile: () => refetch({ requestPolicy: "network-only" }),
+    refetchProfile: loadProfiles,
+    refreshProfile: loadProfiles, // Alias pour refetchProfile
     createIndividualProfile,
     createBusinessProfile,
     updateProfile,
+    switchProfile,
     isIndividual: profile ? isIndividualProfile(profile) : false,
     isBusiness: profile ? isBusinessProfile(profile) : false,
   };
@@ -244,19 +273,7 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
 }
 
 // =============================================================================
-// PROVIDER PRINCIPAL (avec urql Provider)
-// =============================================================================
-
-export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <UrqlProvider value={profileClient}>
-      <ProfileProviderInner>{children}</ProfileProviderInner>
-    </UrqlProvider>
-  );
-}
-
-// =============================================================================
-// HOOK
+// HOOKS
 // =============================================================================
 
 export function useProfile(): ProfileContextValue {
@@ -266,10 +283,6 @@ export function useProfile(): ProfileContextValue {
   }
   return context;
 }
-
-// =============================================================================
-// HOOK POUR VÉRIFIER SI L'UTILISATEUR A UN PROFIL
-// =============================================================================
 
 export function useRequireProfile() {
   const { hasProfile, needsOnboarding, isLoading } = useProfile();

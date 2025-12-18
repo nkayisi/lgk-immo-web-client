@@ -4,9 +4,9 @@
  * Hook pour protéger les routes nécessitant un profil.
  * Redirige vers l'onboarding si l'utilisateur n'a pas de profil.
  */
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useProfile } from '@/contexts/profile-context';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useProfile } from "@/contexts/profile-context";
 
 interface UseProfileGuardOptions {
   redirectTo?: string;

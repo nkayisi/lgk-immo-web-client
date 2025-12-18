@@ -1,21 +1,52 @@
 "use client";
 
-import { useState, FormEvent, useMemo } from "react";
+import { useState, FormEvent, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signUp, authClient } from "@/lib/auth-client";
-import { Eye, EyeOff, AlertCircle, Loader2, Check, X } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader2,
+  Check,
+  X,
+  User,
+  Building2,
+} from "lucide-react";
+import { ProfileType } from "@/lib/profile/types";
+import { ensureProfileAction } from "@/lib/profile/ensure-profile";
 
 export function RegisterForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [profileType, setProfileType] = useState<ProfileType>(
+    ProfileType.INDIVIDUAL
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const router = useRouter();
+
+  // Récupérer le type de profil depuis l'URL
+  useEffect(() => {
+    const type = searchParams.get("type");
+    console.log("[RegisterForm] URL type parameter:", type);
+    if (type === "individual") {
+      console.log("[RegisterForm] Setting profileType to INDIVIDUAL");
+      setProfileType(ProfileType.INDIVIDUAL);
+    } else if (type === "business") {
+      console.log("[RegisterForm] Setting profileType to BUSINESS");
+      setProfileType(ProfileType.BUSINESS);
+    } else {
+      // Rediriger vers la page de sélection si pas de type
+      router.push("/get-started");
+    }
+  }, [searchParams, router]);
 
   // Password strength checker
   const passwordStrength = useMemo(() => {
@@ -45,22 +76,26 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
-      return;
-    }
 
     if (!acceptTerms) {
-      setError("Veuillez accepter les conditions d&apos;utilisation");
+      setError("Vous devez accepter les conditions d'utilisation");
       return;
     }
 
+    if (passwordStrength.score < 3) {
+      setError("Le mot de passe n'est pas assez fort");
+      return;
+    }
+
+    setError("");
     setLoading(true);
 
     try {
-      const result = await signUp.email({ email, password, name });
+      const result = await signUp.email({
+        email,
+        password,
+        name: name.trim() || "", // Nom dans User temporairement
+      });
       if (result.error) {
         if (result.error.status === 403) {
           router.push(`/verify-email?email=${encodeURIComponent(email)}`);
@@ -68,6 +103,19 @@ export function RegisterForm() {
         }
         setError(result.error.message || "Échec de la création du compte");
       } else {
+        // Créer automatiquement le profil après l'inscription
+        if (result.data?.user) {
+          console.log(
+            "[RegisterForm] Creating profile with type:",
+            profileType
+          );
+          await ensureProfileAction({
+            userId: result.data.user.id,
+            email: result.data.user.email,
+            name: name.trim() || undefined,
+            profileType,
+          });
+        }
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err: unknown) {
@@ -80,21 +128,17 @@ export function RegisterForm() {
   };
 
   const handleSocialLogin = (provider: "google" | "facebook") => {
-    setSocialLoading(provider);
+    // Stocker le type de profil dans sessionStorage pour OAuth
+    sessionStorage.setItem("pendingProfileType", profileType);
     authClient.signIn.social({
       provider,
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     });
   };
 
   return (
     <div className="w-full">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">
-          Créer un compte
-        </h1>
-      </div>
+      {/* Header removed - now in page */}
 
       {/* Social Login Buttons */}
       <div className="space-y-3 mb-5">
@@ -172,13 +216,15 @@ export function RegisterForm() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name Field */}
+        {/* Name Field - Conditional based on profile type */}
         <div className="space-y-1.5">
           <label
             htmlFor="name"
             className="block text-sm font-medium text-slate-700"
           >
-            Nom complet
+            {profileType === ProfileType.INDIVIDUAL
+              ? "Nom complet"
+              : "Nom de l'entreprise"}
           </label>
           <input
             id="name"
@@ -188,7 +234,11 @@ export function RegisterForm() {
             required
             autoComplete="name"
             className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
-            placeholder="Jean Kabongo"
+            placeholder={
+              profileType === ProfileType.INDIVIDUAL
+                ? "Jean Kabongo"
+                : "LGK Immobilier SARL"
+            }
           />
         </div>
 
@@ -333,13 +383,13 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={loading || !acceptTerms}
-          className="w-full py-3.5 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full py-4 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
         >
           {loading ? (
-            <>
+            <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Création en cours...</span>
-            </>
+              Création en cours...
+            </span>
           ) : (
             <span>Créer mon compte</span>
           )}
@@ -348,10 +398,10 @@ export function RegisterForm() {
 
       {/* Sign In Link */}
       <p className="mt-6 text-center text-sm text-slate-600">
-        Déjà un compte ?{" "}
+        Vous avez déjà un compte ?{" "}
         <Link
           href="/login"
-          className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+          className="font-semibold text-slate-900 hover:underline"
         >
           Se connecter
         </Link>

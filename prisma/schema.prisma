@@ -7,6 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum ProfileType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum DocumentType {
+  ID_CARD
+  PASSPORT
+  COMPANY_REGISTRATION
+  TAX_CERTIFICATE
+  PROFILE_PHOTO
+  PROOF_OF_ADDRESS
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProfileRole {
+  TENANT      // Locataire
+  LANDLORD    // Bailleur
+  AGENT       // Commissionnaire/Agent immobilier
+}
+
+// =============================================================================
+// AUTH MODELS
+// =============================================================================
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -16,9 +58,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  verifications Verification[]
+  sessions           Session[]
+  accounts           Account[]
+  verifications      Verification[]
+  profiles           Profile[]
+  activeProfileId    String?
 
   @@map("users")
 }
@@ -74,4 +118,100 @@ model Verification {
 
   @@index([identifier])
   @@map("verifications")
+}
+
+// =============================================================================
+// PROFILE MODELS
+// =============================================================================
+
+model Profile {
+  id          String      @id @default(cuid())
+  userId      String
+  profileType ProfileType
+  phoneNumber String?
+  country     String?
+  city        String?
+  address     String?
+  isCertified Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  individualProfile  IndividualProfile?
+  businessProfile    BusinessProfile?
+  documents          ProfileDocument[]
+  profileVerifications ProfileVerification[]
+  profileRoles       ProfileRoleAssignment[]
+
+  @@index([userId])
+  @@map("profiles")
+}
+
+model IndividualProfile {
+  id               String   @id
+  fullName         String?
+  dateOfBirth      DateTime?
+  gender           Gender?
+  nationalIdNumber String?  @unique
+
+  profile Profile @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("individual_profiles")
+}
+
+model BusinessProfile {
+  id                      String  @id
+  businessName            String?
+  registrationNumber      String? @unique
+  taxId                   String? @unique
+  legalRepresentativeName String?
+
+  profile Profile @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("business_profiles")
+}
+
+model ProfileDocument {
+  id         String       @id @default(cuid())
+  profileId  String
+  fileType   DocumentType
+  fileName   String?
+  url        String
+  verified   Boolean      @default(false)
+  uploadedAt DateTime     @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("profile_documents")
+}
+
+model ProfileVerification {
+  id         String             @id @default(cuid())
+  profileId  String
+  status     VerificationStatus @default(PENDING)
+  reviewedBy String?
+  reviewedAt DateTime?
+  notes      String?            @db.Text
+  createdAt  DateTime           @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("profile_verifications")
+}
+
+model ProfileRoleAssignment {
+  id        String      @id @default(cuid())
+  profileId String
+  role      ProfileRole
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, role])
+  @@index([profileId])
+  @@map("profile_role_assignments")
 }

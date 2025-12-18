@@ -5,13 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/contexts/profile-context";
 import { useSession } from "@/lib/auth-client";
 import {
-  BusinessProfile,
   getProfileDisplayName,
-  IndividualProfile,
   isIndividualProfile,
-  Profile,
+  type Profile,
   VerificationStatus,
-} from "@/lib/graphql/types";
+  calculateProfileCompletion,
+} from "@/lib/profile/types";
+import { ProfileCompletionBanner } from "@/components/profile";
 import { motion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -288,112 +288,6 @@ function ActivityItem({
   );
 }
 
-function ProfileCompletionCard({ profile }: { profile: Profile }) {
-  const isIndividual = isIndividualProfile(profile);
-  const verificationStatus =
-    profile.verifications?.[0]?.status || VerificationStatus.PENDING;
-
-  // Calculer la progression du profil
-  const calculateProgress = () => {
-    let filled = 0;
-    let total = 0;
-
-    if (isIndividual) {
-      const p = profile as IndividualProfile;
-      const fields = [
-        p.firstName,
-        p.lastName,
-        p.phoneNumber,
-        p.country,
-        p.city,
-        p.address,
-        p.dateOfBirth,
-        p.gender,
-      ];
-      total = fields.length;
-      filled = fields.filter(Boolean).length;
-    } else {
-      const p = profile as BusinessProfile;
-      const fields = [
-        p.businessName,
-        p.phoneNumber,
-        p.country,
-        p.city,
-        p.address,
-        p.registrationNumber,
-        p.taxId,
-        p.legalRepresentativeName,
-      ];
-      total = fields.length;
-      filled = fields.filter(Boolean).length;
-    }
-
-    return Math.round((filled / total) * 100);
-  };
-
-  const progress = calculateProgress();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-    >
-      <Card className="overflow-hidden">
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                  isIndividual
-                    ? "bg-gradient-to-br from-emerald-500 to-teal-500"
-                    : "bg-gradient-to-br from-blue-500 to-indigo-500"
-                }`}
-              >
-                {isIndividual ? (
-                  <User className="w-8 h-8" />
-                ) : (
-                  <Building2 className="w-8 h-8" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold">Complétez votre profil</h3>
-                <p className="text-slate-400 text-sm">
-                  Un profil complet augmente vos chances d&apos;être contacté de
-                  80%
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex-1 md:w-48">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-slate-400">Progression</span>
-                  <span className="font-medium text-emerald-400">
-                    {progress}%
-                  </span>
-                </div>
-                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ delay: 0.5, duration: 0.8 }}
-                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
-                  />
-                </div>
-              </div>
-              <Link href="/dashboard/profile">
-                <Button variant="secondary" className="gap-2">
-                  Compléter
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
 
 // =============================================================================
 // PAGE PRINCIPALE
@@ -409,9 +303,10 @@ export default function DashboardPage() {
 
   const displayName = getProfileDisplayName(profile);
   const isIndividual = isIndividualProfile(profile);
-  const firstName = isIndividual
-    ? (profile as IndividualProfile).firstName || displayName
-    : displayName;
+  const firstName =
+    isIndividual && profile.individualProfile
+      ? profile.individualProfile.fullName || displayName
+      : displayName;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -440,6 +335,11 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
+      {/* Profile Completion Banner */}
+      <div className="mb-8">
+        <ProfileCompletionBanner profile={profile} />
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat, index) => (
@@ -448,25 +348,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        {/* Quick Actions */}
-        <div className="lg:col-span-2">
-          <h2 className="text-lg font-bold text-slate-900 mb-4">
-            Actions rapides
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {quickActions.map((action, index) => (
-              <QuickActionCard
-                key={action.title}
-                action={action}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-
+      <div className="mb-8">
         {/* Recent Activity */}
-        <div>
+        <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900">
               Activité récente
@@ -502,9 +386,6 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-
-      {/* Profile Completion */}
-      <ProfileCompletionCard profile={profile} />
     </div>
   );
 }

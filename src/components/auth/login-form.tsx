@@ -50,11 +50,6 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      {/* Logo & Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">Connexion</h1>
-      </div>
-
       {/* Social Login Buttons - Style Google/Airbnb */}
       <div className="space-y-3 mb-6">
         {/* Google Button */}
@@ -196,13 +191,13 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full py-4 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
         >
           {loading ? (
-            <>
+            <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Connexion en cours...</span>
-            </>
+              Connexion...
+            </span>
           ) : (
             <span>Se connecter</span>
           )}
@@ -210,11 +205,11 @@ export function LoginForm() {
       </form>
 
       {/* Sign Up Link */}
-      <p className="mt-8 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-slate-600">
         Vous n&apos;avez pas de compte ?{" "}
         <Link
-          href="/register"
-          className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+          href="/get-started"
+          className="font-semibold text-slate-900 hover:underline"
         >
           Créer un compte
         </Link>

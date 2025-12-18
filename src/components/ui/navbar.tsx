@@ -245,7 +245,7 @@ export function Navbar() {
                   Connexion
                 </Link>
                 <Link
-                  href="/register"
+                  href="/get-started"
                   className="px-5 py-2.5 bg-slate-900 text-white font-medium rounded-full hover:bg-slate-800 transition-colors"
                 >
                   S&apos;inscrire
@@ -457,7 +457,7 @@ export function Navbar() {
                       Connexion
                     </Link>
                     <Link
-                      href="/register"
+                      href="/get-started"
                       onClick={() => setIsOpen(false)}
                       className="flex items-center justify-center w-full py-2.5 text-sm bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors"
                     >

@@ -77,7 +77,7 @@ function VerifyEmailContent() {
         </p>
 
         {/* Tips */}
-        <div className="bg-slate-50 rounded-xl p-4 mb-6 text-left">
+        <div className="bg-slate-50 rounded-xl p-4 mb-6 max-w-sm mx-auto">
           <p className="text-sm font-medium text-slate-700 mb-2">
             Vous n&apos;avez pas reçu l&apos;email ?
           </p>
@@ -131,7 +131,7 @@ function VerifyEmailContent() {
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full" />
           </div>
         </div>
 
