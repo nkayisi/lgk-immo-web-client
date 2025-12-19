@@ -38,17 +38,6 @@ export async function ensureProfileAction(
       profileType: params.profileType,
     });
 
-    // Mettre à jour le User avec firstName et lastName si fournis
-    if (params.firstName || params.lastName) {
-      await prisma.user.update({
-        where: { id: params.userId },
-        data: {
-          firstName: params.firstName,
-          lastName: params.lastName,
-        },
-      });
-    }
-
     const hasProfile = await ensureUserHasProfile(params.userId);
     
     if (!hasProfile) {
@@ -59,6 +48,8 @@ export async function ensureProfileAction(
         userId: params.userId,
         email: params.email,
         name: params.name,
+        firstName: params.firstName,
+        lastName: params.lastName,
         businessName: params.businessName,
         profileType: typeToUse,
       });

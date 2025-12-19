@@ -191,7 +191,7 @@ export default function AccountDashboardPage() {
     const displayName = getProfileDisplayName(profile);
     const isIndividual = isIndividualProfile(profile);
     const firstName = isIndividual
-        ? profile.user.firstName || displayName.split(" ")[0]
+        ? profile.individualProfile.firstName || displayName.split(" ")[0]
         : displayName;
 
     return (

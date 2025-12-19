@@ -30,8 +30,6 @@ export interface UserData {
   id: string;
   email: string;
   name: string | null;
-  firstName: string | null;
-  lastName: string | null;
   image: string | null;
 }
 
@@ -40,7 +38,8 @@ export interface UserData {
 // =============================================================================
 
 export interface IndividualProfileData {
-  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   dateOfBirth: Date | null;
   gender: Gender | null;
   nationalIdNumber: string | null;
@@ -73,7 +72,8 @@ export interface CreateIndividualProfileInput {
   country?: string;
   city?: string;
   address?: string;
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   dateOfBirth?: string;
   gender?: Gender;
   nationalIdNumber?: string;
@@ -100,7 +100,8 @@ export interface UpdateProfileInput {
 }
 
 export interface UpdateIndividualProfileInput extends UpdateProfileInput {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   dateOfBirth?: string;
   gender?: Gender;
   nationalIdNumber?: string;
@@ -151,10 +152,10 @@ export function isBusinessProfile(
 
 export function getProfileDisplayName(profile: Profile): string {
   if (isIndividualProfile(profile)) {
-    const firstName = profile.user.firstName || "";
-    const lastName = profile.user.lastName || "";
+    const firstName = profile.individualProfile.firstName || "";
+    const lastName = profile.individualProfile.lastName || "";
     const fullName = `${firstName} ${lastName}`.trim();
-    return fullName || profile.individualProfile.fullName || profile.user.name || "Utilisateur";
+    return fullName || profile.user.name || "Utilisateur";
   }
   if (isBusinessProfile(profile)) {
     return profile.businessProfile.businessName || "Entreprise";
@@ -226,8 +227,7 @@ export function calculateProfileCompletion(profile: Profile): number {
   let specificFields: (string | Date | Gender | null | undefined)[] = [];
 
   if (isIndividualProfile(profile)) {
-    const { dateOfBirth, gender } = profile.individualProfile;
-    const { firstName, lastName } = profile.user;
+    const { firstName, lastName, dateOfBirth, gender } = profile.individualProfile;
     specificFields = [firstName, lastName, dateOfBirth, gender];
   } else if (isBusinessProfile(profile)) {
     const { businessName, registrationNumber, taxId, legalRepresentativeName } =

@@ -54,8 +54,6 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   name          String?   // Champ conservé pour compatibilité avec better-auth
-  firstName     String?   // Prénom de l'utilisateur
-  lastName      String?   // Nom de famille de l'utilisateur
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -150,11 +148,12 @@ model Profile {
 }
 
 model IndividualProfile {
-  id               String   @id
-  fullName         String?
+  id               String    @id
+  firstName        String?   // Prénom
+  lastName         String?   // Nom de famille
   dateOfBirth      DateTime?
   gender           Gender?
-  nationalIdNumber String?  @unique
+  nationalIdNumber String?   @unique
 
   profile Profile @relation(fields: [id], references: [id], onDelete: Cascade)
 

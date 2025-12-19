@@ -11,6 +11,8 @@ interface CreateProfileParams {
   userId: string;
   email?: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
   businessName?: string;
   profileType?: ProfileType;
 }
@@ -23,6 +25,8 @@ export async function autoCreateProfile({
   userId,
   email,
   name,
+  firstName,
+  lastName,
   businessName,
   profileType = ProfileType.INDIVIDUAL,
 }: CreateProfileParams): Promise<void> {
@@ -31,6 +35,8 @@ export async function autoCreateProfile({
       userId,
       email,
       name,
+      firstName,
+      lastName,
       businessName,
       profileType,
     });
@@ -79,7 +85,8 @@ export async function autoCreateProfile({
           profile: {
             connect: { id: profile.id },
           },
-          fullName: name || null,
+          firstName: firstName || null,
+          lastName: lastName || null,
         },
       });
     } else if (profileType === ProfileType.BUSINESS) {

@@ -37,8 +37,6 @@ const profileInclude = {
       id: true,
       email: true,
       name: true,
-      firstName: true,
-      lastName: true,
       image: true,
     },
   },
@@ -231,7 +229,8 @@ export async function createIndividualProfile(
           address: input.address,
           individualProfile: {
             create: {
-              fullName: input.fullName,
+              firstName: input.firstName,
+              lastName: input.lastName,
               dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : null,
               gender: input.gender,
               nationalIdNumber: input.nationalIdNumber,
@@ -421,7 +420,8 @@ export async function updateIndividualProfile(
         address: input.address,
         individualProfile: {
           update: {
-            fullName: input.fullName,
+            firstName: input.firstName,
+            lastName: input.lastName,
             dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : undefined,
             gender: input.gender,
             nationalIdNumber: input.nationalIdNumber,
@@ -756,5 +756,187 @@ export async function deleteProfile(profileId: string): Promise<{ success: boole
   } catch (error) {
     console.error("[Profile] Error deleting profile:", error);
     return { success: false, message: "Erreur lors de la suppression" };
+  }
+}
+
+// =============================================================================
+// MUTATIONS - UPDATE BY SECTION
+// =============================================================================
+
+/**
+ * Met à jour les informations de contact d'un profil.
+ */
+export async function updateContactInfo(
+  profileId: string,
+  data: {
+    phoneNumber?: string;
+    country?: string;
+    city?: string;
+    address?: string;
+  }
+): Promise<ProfileResponse> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { success: false, message: "Non authentifié", profile: null };
+    }
+
+    const existing = await prisma.profile.findFirst({
+      where: { id: profileId, userId },
+    });
+
+    if (!existing) {
+      return { success: false, message: "Profil non trouvé", profile: null };
+    }
+
+    const profile = await prisma.profile.update({
+      where: { id: profileId },
+      data: {
+        phoneNumber: data.phoneNumber,
+        country: data.country,
+        city: data.city,
+        address: data.address,
+      },
+      include: profileInclude,
+    });
+
+    await updateProfileCertification(profileId);
+    revalidatePath("/account");
+    revalidatePath("/account/profile");
+
+    return {
+      success: true,
+      message: "Informations de contact mises à jour",
+      profile: profile as Profile,
+    };
+  } catch (error) {
+    console.error("[Profile] Error updating contact info:", error);
+    return {
+      success: false,
+      message: "Erreur lors de la mise à jour",
+      profile: null,
+    };
+  }
+}
+
+/**
+ * Met à jour les informations personnelles d'un profil individuel.
+ */
+export async function updatePersonalInfo(
+  profileId: string,
+  data: {
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    nationalIdNumber?: string;
+  }
+): Promise<ProfileResponse> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { success: false, message: "Non authentifié", profile: null };
+    }
+
+    const existing = await prisma.profile.findFirst({
+      where: { id: profileId, userId, profileType: ProfileType.INDIVIDUAL },
+    });
+
+    if (!existing) {
+      return { success: false, message: "Profil non trouvé", profile: null };
+    }
+
+    const profile = await prisma.profile.update({
+      where: { id: profileId },
+      data: {
+        individualProfile: {
+          update: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+            gender: data.gender as any,
+            nationalIdNumber: data.nationalIdNumber,
+          },
+        },
+      },
+      include: profileInclude,
+    });
+
+    await updateProfileCertification(profileId);
+    revalidatePath("/account");
+    revalidatePath("/account/profile");
+
+    return {
+      success: true,
+      message: "Informations personnelles mises à jour",
+      profile: profile as Profile,
+    };
+  } catch (error) {
+    console.error("[Profile] Error updating personal info:", error);
+    return {
+      success: false,
+      message: "Erreur lors de la mise à jour",
+      profile: null,
+    };
+  }
+}
+
+/**
+ * Met à jour les informations de l'entreprise d'un profil business.
+ */
+export async function updateBusinessInfo(
+  profileId: string,
+  data: {
+    businessName?: string;
+    registrationNumber?: string;
+    taxId?: string;
+    legalRepresentativeName?: string;
+  }
+): Promise<ProfileResponse> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { success: false, message: "Non authentifié", profile: null };
+    }
+
+    const existing = await prisma.profile.findFirst({
+      where: { id: profileId, userId, profileType: ProfileType.BUSINESS },
+    });
+
+    if (!existing) {
+      return { success: false, message: "Profil non trouvé", profile: null };
+    }
+
+    const profile = await prisma.profile.update({
+      where: { id: profileId },
+      data: {
+        businessProfile: {
+          update: {
+            businessName: data.businessName,
+            registrationNumber: data.registrationNumber,
+            taxId: data.taxId,
+            legalRepresentativeName: data.legalRepresentativeName,
+          },
+        },
+      },
+      include: profileInclude,
+    });
+
+    await updateProfileCertification(profileId);
+    revalidatePath("/account");
+    revalidatePath("/account/profile");
+
+    return {
+      success: true,
+      message: "Informations de l'entreprise mises à jour",
+      profile: profile as Profile,
+    };
+  } catch (error) {
+    console.error("[Profile] Error updating business info:", error);
+    return {
+      success: false,
+      message: "Erreur lors de la mise à jour",
+      profile: null,
+    };
   }
 }

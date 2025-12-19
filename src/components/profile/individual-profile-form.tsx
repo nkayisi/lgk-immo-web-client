@@ -43,15 +43,16 @@ export function IndividualProfileForm({
   onSkipAll,
 }: IndividualProfileFormProps) {
   const [formData, setFormData] = useState({
-    fullName: initialData?.individualProfile?.fullName || "",
+    firstName: initialData?.individualProfile?.firstName || "",
+    lastName: initialData?.individualProfile?.lastName || "",
     phoneNumber: initialData?.phoneNumber || "",
     country: initialData?.country || "RDC",
     city: initialData?.city || "",
     address: initialData?.address || "",
     dateOfBirth: initialData?.individualProfile?.dateOfBirth
       ? new Date(initialData.individualProfile.dateOfBirth)
-          .toISOString()
-          .split("T")[0]
+        .toISOString()
+        .split("T")[0]
       : "",
     gender: initialData?.individualProfile?.gender || "",
     nationalIdNumber: initialData?.individualProfile?.nationalIdNumber || "",
@@ -83,7 +84,8 @@ export function IndividualProfileForm({
 
     try {
       const submitData: Omit<CreateIndividualProfileInput, "externalUserId"> = {
-        fullName: formData.fullName || undefined,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
         phoneNumber: formData.phoneNumber || undefined,
         country: formData.country || undefined,
         city: formData.city || undefined,
@@ -119,7 +121,7 @@ export function IndividualProfileForm({
   const canProceed = () => {
     switch (currentStep) {
       case 0:
-        return formData.fullName.trim().length > 0;
+        return formData.firstName.trim().length > 0 && formData.lastName.trim().length > 0;
       case 1:
         return true;
       case 2:
@@ -136,15 +138,16 @@ export function IndividualProfileForm({
   };
 
   const handleContinueLater = async () => {
-    if (!formData.fullName || formData.fullName.trim().length === 0) {
-      setError("Veuillez renseigner votre nom complet.");
+    if (!formData.firstName || formData.firstName.trim().length === 0 || !formData.lastName || formData.lastName.trim().length === 0) {
+      setError("Veuillez renseigner votre prénom et nom.");
       return;
     }
     setError(null);
     setIsLoading(true);
     try {
       const submitData: Omit<CreateIndividualProfileInput, "externalUserId"> = {
-        fullName: formData.fullName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         phoneNumber: formData.phoneNumber || undefined,
         country: formData.country || undefined,
         city: formData.city || undefined,
@@ -211,15 +214,13 @@ export function IndividualProfileForm({
                   onClick={() => setCurrentStep(index)}
                   className={`
                     w-5 h-5 rounded-full border-2 transition-all
-                    ${
-                      isActive
-                        ? "bg-emerald-500 border-emerald-500 scale-125"
-                        : ""
+                    ${isActive
+                      ? "bg-emerald-500 border-emerald-500 scale-125"
+                      : ""
                     }
-                    ${
-                      isCompleted
-                        ? "bg-emerald-500 border-emerald-500"
-                        : "bg-white border-slate-300"
+                    ${isCompleted
+                      ? "bg-emerald-500 border-emerald-500"
+                      : "bg-white border-slate-300"
                     }
                   `}
                 />
@@ -240,10 +241,9 @@ export function IndividualProfileForm({
                 onClick={() => setCurrentStep(index)}
                 className={`
                   flex flex-col items-center gap-1.5 transition-all
-                  ${
-                    isActive
-                      ? "text-emerald-600"
-                      : isCompleted
+                  ${isActive
+                    ? "text-emerald-600"
+                    : isCompleted
                       ? "text-emerald-500"
                       : "text-slate-400"
                   }
@@ -252,10 +252,9 @@ export function IndividualProfileForm({
                 <div
                   className={`
                     w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                    ${
-                      isActive
-                        ? "bg-emerald-100 shadow-sm"
-                        : isCompleted
+                    ${isActive
+                      ? "bg-emerald-100 shadow-sm"
+                      : isCompleted
                         ? "bg-emerald-50"
                         : "bg-slate-100"
                     }
@@ -306,19 +305,35 @@ export function IndividualProfileForm({
           {/* Step 0: Identity */}
           {currentStep === 0 && (
             <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Nom complet <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
-                  placeholder="Jean Kabongo"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Prénom <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                    placeholder="Jean"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Nom <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                    placeholder="Kabongo"
+                  />
+                </div>
               </div>
 
               <div>
@@ -454,10 +469,9 @@ export function IndividualProfileForm({
               disabled={currentStep === 0}
               className={`
                 flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all
-                ${
-                  currentStep === 0
-                    ? "opacity-0 pointer-events-none"
-                    : "text-slate-600 hover:bg-slate-100"
+                ${currentStep === 0
+                  ? "opacity-0 pointer-events-none"
+                  : "text-slate-600 hover:bg-slate-100"
                 }
               `}
             >
@@ -516,7 +530,7 @@ export function IndividualProfileForm({
                 type="button"
                 onClick={handleContinueLater}
                 disabled={
-                  isLoading || !formData.fullName
+                  isLoading || !formData.firstName || !formData.lastName
                 }
                 className="text-sm text-slate-500 hover:text-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
