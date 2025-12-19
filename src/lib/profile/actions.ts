@@ -263,7 +263,7 @@ export async function createIndividualProfile(
     }
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -359,7 +359,7 @@ export async function createBusinessProfile(
     }
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -425,7 +425,7 @@ export async function updateIndividualProfile(
     await updateProfileCertification(profileId);
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -487,7 +487,7 @@ export async function updateBusinessProfile(
     await updateProfileCertification(profileId);
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -591,7 +591,7 @@ export async function addProfileRole(
       include: profileInclude,
     });
 
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -641,7 +641,7 @@ export async function removeProfileRole(
       include: profileInclude,
     });
 
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return {
       success: true,
@@ -740,7 +740,7 @@ export async function deleteProfile(profileId: string): Promise<{ success: boole
     }
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account/profile");
 
     return { success: true, message: "Profil supprimé avec succès" };
   } catch (error) {

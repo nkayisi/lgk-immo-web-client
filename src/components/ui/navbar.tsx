@@ -103,7 +103,7 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {/* Ajouter un bien */}
             <Link
-              href="/dashboard/properties/new"
+              href="/account/properties/new"
               className="flex items-center gap-2 border border-slate-200 rounded-full px-4 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -299,7 +299,7 @@ export function Navbar() {
               <div className="bg-white overflow-y-auto h-[calc(100vh-4rem)] px-4 py-5">
                 {/* Ajouter un bien - CTA principal */}
                 <Link
-                  href="/dashboard/properties/new"
+                  href="/account/properties/new"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-center gap-2 w-full py-2.5 text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-xl shadow-md shadow-emerald-500/20 mb-5"
                 >
@@ -398,7 +398,7 @@ export function Navbar() {
                     </div>
 
                     {/* Navigation Links */}
-                 
+
                     <Link
                       href="/account"
                       onClick={() => setIsOpen(false)}

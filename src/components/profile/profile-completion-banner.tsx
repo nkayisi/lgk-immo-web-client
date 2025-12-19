@@ -90,7 +90,7 @@ export function ProfileCompletionBanner({
 
           {/* CTA Button */}
           <Link
-            href="/dashboard/profile"
+            href="/account/profile"
             className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-white/90 transition-colors"
           >
             Compléter mon profil
