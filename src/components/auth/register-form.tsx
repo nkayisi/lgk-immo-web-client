@@ -20,7 +20,9 @@ import { ensureProfileAction } from "@/lib/profile/ensure-profile";
 export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [profileType, setProfileType] = useState<ProfileType>(
@@ -32,7 +34,7 @@ export function RegisterForm() {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  // Récupérer le type de profil depuis l'URL
+  // Récupérer le type de profil depuis l'URL et le nom d'entreprise depuis sessionStorage
   useEffect(() => {
     const type = searchParams.get("type");
     console.log("[RegisterForm] URL type parameter:", type);
@@ -42,6 +44,14 @@ export function RegisterForm() {
     } else if (type === "business") {
       console.log("[RegisterForm] Setting profileType to BUSINESS");
       setProfileType(ProfileType.BUSINESS);
+      // Récupérer le nom de l'entreprise depuis sessionStorage
+      const storedBusinessName = sessionStorage.getItem("pendingBusinessName");
+      if (storedBusinessName) {
+        setBusinessName(storedBusinessName);
+      } else {
+        // Si pas de nom d'entreprise, rediriger vers la page de collecte
+        router.push("/get-started/business");
+      }
     } else {
       // Rediriger vers la page de sélection si pas de type
       router.push("/get-started");
@@ -91,10 +101,15 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
+      // Construire le nom complet pour better-auth
+      const fullName = profileType === ProfileType.INDIVIDUAL
+        ? `${firstName.trim()} ${lastName.trim()}`.trim()
+        : businessName.trim();
+
       const result = await signUp.email({
         email,
         password,
-        name: name.trim() || "", // Nom dans User temporairement
+        name: fullName,
       });
       if (result.error) {
         if (result.error.status === 403) {
@@ -112,9 +127,14 @@ export function RegisterForm() {
           await ensureProfileAction({
             userId: result.data.user.id,
             email: result.data.user.email,
-            name: name.trim() || undefined,
+            name: profileType === ProfileType.INDIVIDUAL ? fullName : undefined,
+            firstName: profileType === ProfileType.INDIVIDUAL ? firstName.trim() : undefined,
+            lastName: profileType === ProfileType.INDIVIDUAL ? lastName.trim() : undefined,
+            businessName: profileType === ProfileType.BUSINESS ? businessName.trim() : undefined,
             profileType,
           });
+          // Nettoyer sessionStorage après inscription réussie
+          sessionStorage.removeItem("pendingBusinessName");
         }
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       }
@@ -132,7 +152,7 @@ export function RegisterForm() {
     sessionStorage.setItem("pendingProfileType", profileType);
     authClient.signIn.social({
       provider,
-      callbackURL: "/dashboard",
+      callbackURL: "/account",
     });
   };
 
@@ -216,31 +236,61 @@ export function RegisterForm() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name Field - Conditional based on profile type */}
-        <div className="space-y-1.5">
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-slate-700"
-          >
-            {profileType === ProfileType.INDIVIDUAL
-              ? "Nom complet"
-              : "Nom de l'entreprise"}
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            autoComplete="name"
-            className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
-            placeholder={
-              profileType === ProfileType.INDIVIDUAL
-                ? "Jean Kabongo"
-                : "LGK Immobilier SARL"
-            }
-          />
-        </div>
+        {/* Name Fields - Conditional based on profile type */}
+        {profileType === ProfileType.INDIVIDUAL ? (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-slate-700"
+              >
+                Prénom
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                autoComplete="given-name"
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                placeholder="Jean"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-slate-700"
+              >
+                Nom
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                autoComplete="family-name"
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                placeholder="Kabongo"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">
+                  {businessName}
+                </p>
+                <p className="text-xs text-emerald-600">Compte Professionnel</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Email Field */}
         <div className="space-y-1.5">
@@ -305,13 +355,12 @@ export function RegisterForm() {
                   />
                 </div>
                 <span
-                  className={`text-xs font-medium ${
-                    passwordStrength.score <= 1
-                      ? "text-red-500"
-                      : passwordStrength.score <= 2
+                  className={`text-xs font-medium ${passwordStrength.score <= 1
+                    ? "text-red-500"
+                    : passwordStrength.score <= 2
                       ? "text-yellow-600"
                       : "text-emerald-600"
-                  }`}
+                    }`}
                 >
                   {getStrengthText()}
                 </span>
@@ -325,13 +374,12 @@ export function RegisterForm() {
                 ].map(({ key, label }) => (
                   <div
                     key={key}
-                    className={`flex items-center gap-1 ${
-                      passwordStrength.checks[
-                        key as keyof typeof passwordStrength.checks
-                      ]
-                        ? "text-emerald-600"
-                        : "text-slate-400"
-                    }`}
+                    className={`flex items-center gap-1 ${passwordStrength.checks[
+                      key as keyof typeof passwordStrength.checks
+                    ]
+                      ? "text-emerald-600"
+                      : "text-slate-400"
+                      }`}
                   >
                     {passwordStrength.checks[
                       key as keyof typeof passwordStrength.checks
@@ -353,11 +401,10 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setAcceptTerms(!acceptTerms)}
-            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-              acceptTerms
-                ? "bg-emerald-500 border-emerald-500"
-                : "border-slate-300 hover:border-slate-400"
-            }`}
+            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${acceptTerms
+              ? "bg-emerald-500 border-emerald-500"
+              : "border-slate-300 hover:border-slate-400"
+              }`}
           >
             {acceptTerms && <Check className="w-3 h-3 text-white" />}
           </button>

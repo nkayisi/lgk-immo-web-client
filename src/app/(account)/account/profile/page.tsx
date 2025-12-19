@@ -79,11 +79,13 @@ export default function ProfilePage() {
 
                     {/* Profile Info */}
                     <div className="space-y-4">
-                        {isIndividual && profile.individualProfile && (
+                        {isIndividual && (
                             <div className="flex items-center gap-3 text-slate-600">
                                 <User className="w-5 h-5 text-slate-400" />
                                 <span>
-                                    {profile.individualProfile.fullName || "Nom non renseigné"}
+                                    {profile.user.firstName && profile.user.lastName
+                                        ? `${profile.user.firstName} ${profile.user.lastName}`
+                                        : profile.user.name || "Nom non renseigné"}
                                 </span>
                             </div>
                         )}

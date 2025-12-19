@@ -8,11 +8,15 @@
 
 import { autoCreateProfile, ensureUserHasProfile } from "./auto-create";
 import { ProfileType } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 interface EnsureProfileParams {
   userId: string;
   email: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
+  businessName?: string;
   profileType?: ProfileType;
 }
 
@@ -28,8 +32,22 @@ export async function ensureProfileAction(
       userId: params.userId,
       email: params.email,
       name: params.name,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      businessName: params.businessName,
       profileType: params.profileType,
     });
+
+    // Mettre à jour le User avec firstName et lastName si fournis
+    if (params.firstName || params.lastName) {
+      await prisma.user.update({
+        where: { id: params.userId },
+        data: {
+          firstName: params.firstName,
+          lastName: params.lastName,
+        },
+      });
+    }
 
     const hasProfile = await ensureUserHasProfile(params.userId);
     
@@ -41,6 +59,7 @@ export async function ensureProfileAction(
         userId: params.userId,
         email: params.email,
         name: params.name,
+        businessName: params.businessName,
         profileType: typeToUse,
       });
     } else {

@@ -23,6 +23,19 @@ import {
 export { ProfileType, Gender, DocumentType, VerificationStatus, ProfileRole };
 
 // =============================================================================
+// USER TYPE
+// =============================================================================
+
+export interface UserData {
+  id: string;
+  email: string;
+  name: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  image: string | null;
+}
+
+// =============================================================================
 // PROFILE TYPES
 // =============================================================================
 
@@ -41,6 +54,7 @@ export interface BusinessProfileData {
 }
 
 export interface ProfileWithDetails extends PrismaProfile {
+  user: UserData;
   individualProfile: PrismaIndividualProfile | null;
   businessProfile: PrismaBusinessProfile | null;
   documents: PrismaProfileDocument[];
@@ -137,12 +151,15 @@ export function isBusinessProfile(
 
 export function getProfileDisplayName(profile: Profile): string {
   if (isIndividualProfile(profile)) {
-    return profile.individualProfile.fullName || "Utilisateur";
+    const firstName = profile.user.firstName || "";
+    const lastName = profile.user.lastName || "";
+    const fullName = `${firstName} ${lastName}`.trim();
+    return fullName || profile.individualProfile.fullName || profile.user.name || "Utilisateur";
   }
   if (isBusinessProfile(profile)) {
     return profile.businessProfile.businessName || "Entreprise";
   }
-  return "Utilisateur";
+  return profile.user.name || "Utilisateur";
 }
 
 export function getVerificationStatusLabel(status: VerificationStatus): string {
@@ -209,8 +226,9 @@ export function calculateProfileCompletion(profile: Profile): number {
   let specificFields: (string | Date | Gender | null | undefined)[] = [];
 
   if (isIndividualProfile(profile)) {
-    const { fullName, dateOfBirth, gender } = profile.individualProfile;
-    specificFields = [fullName, dateOfBirth, gender];
+    const { dateOfBirth, gender } = profile.individualProfile;
+    const { firstName, lastName } = profile.user;
+    specificFields = [firstName, lastName, dateOfBirth, gender];
   } else if (isBusinessProfile(profile)) {
     const { businessName, registrationNumber, taxId, legalRepresentativeName } =
       profile.businessProfile;

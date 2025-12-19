@@ -32,6 +32,16 @@ async function getCurrentUserId(): Promise<string | null> {
 }
 
 const profileInclude = {
+  user: {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      image: true,
+    },
+  },
   individualProfile: true,
   businessProfile: true,
   documents: true,
@@ -262,7 +272,7 @@ export async function createIndividualProfile(
       await updateProfileCertification(profile.id);
     }
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
     revalidatePath("/account/profile");
 
     return {
@@ -358,7 +368,7 @@ export async function createBusinessProfile(
       await updateProfileCertification(profile.id);
     }
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
     revalidatePath("/account/profile");
 
     return {
@@ -424,7 +434,7 @@ export async function updateIndividualProfile(
     // Mettre à jour la certification
     await updateProfileCertification(profileId);
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
     revalidatePath("/account/profile");
 
     return {
@@ -486,7 +496,7 @@ export async function updateBusinessProfile(
     // Mettre à jour la certification
     await updateProfileCertification(profileId);
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
     revalidatePath("/account/profile");
 
     return {
@@ -534,7 +544,7 @@ export async function switchActiveProfile(profileId: string): Promise<ProfileRes
       data: { activeProfileId: profileId },
     });
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
 
     return {
       success: true,
@@ -739,7 +749,7 @@ export async function deleteProfile(profileId: string): Promise<{ success: boole
       }
     }
 
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
     revalidatePath("/account/profile");
 
     return { success: true, message: "Profil supprimé avec succès" };

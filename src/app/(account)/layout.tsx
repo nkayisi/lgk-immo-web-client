@@ -27,14 +27,24 @@ function AccountLayoutContent({ children }: { children: React.ReactNode }) {
         if (!sessionLoading && !profileLoading && session?.user && !profile) {
             // Récupérer le type de profil depuis sessionStorage (pour OAuth)
             const pendingType = sessionStorage.getItem("pendingProfileType");
+            const pendingBusinessName = sessionStorage.getItem("pendingBusinessName");
             let profileType: ProfileType | undefined = undefined;
+            let businessName: string | undefined = undefined;
+            let firstName: string | undefined = undefined;
+            let lastName: string | undefined = undefined;
 
             if (pendingType === "INDIVIDUAL") {
                 profileType = ProfileType.INDIVIDUAL;
+                // Pour OAuth, on peut extraire le nom depuis le profil Google/Facebook
+                const nameParts = session.user.name?.split(" ") || [];
+                firstName = nameParts[0] || undefined;
+                lastName = nameParts.slice(1).join(" ") || undefined;
                 sessionStorage.removeItem("pendingProfileType");
             } else if (pendingType === "BUSINESS") {
                 profileType = ProfileType.BUSINESS;
+                businessName = pendingBusinessName || undefined;
                 sessionStorage.removeItem("pendingProfileType");
+                sessionStorage.removeItem("pendingBusinessName");
             }
 
             // Créer automatiquement un profil si manquant
@@ -42,6 +52,9 @@ function AccountLayoutContent({ children }: { children: React.ReactNode }) {
                 userId: session.user.id,
                 email: session.user.email,
                 profileType,
+                firstName,
+                lastName,
+                businessName,
             }).then(() => {
                 refreshProfile();
             });

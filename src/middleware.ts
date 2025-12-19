@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email']
 
 // Routes protégées (nécessitent authentification)
-const PROTECTED_ROUTES = ['/dashboard', '/profile', '/listings', '/onboarding']
+const PROTECTED_ROUTES = ['/account', '/profile', '/listings', '/onboarding']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
   
   // Redirect authenticated users away from auth pages (except verify-email)
   if (isAuthenticated && isPublicRoute && !pathname.startsWith('/verify-email')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/account', request.url))
   }
   
   // Redirect unauthenticated users to login for protected routes

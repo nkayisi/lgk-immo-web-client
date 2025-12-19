@@ -284,6 +284,15 @@ export function useProfile(): ProfileContextValue {
   return context;
 }
 
+/**
+ * Version safe de useProfile qui retourne null si le contexte n'est pas disponible.
+ * Utile pour les composants qui peuvent être rendus en dehors du ProfileProvider.
+ */
+export function useProfileSafe(): ProfileContextValue | null {
+  const context = useContext(ProfileContext);
+  return context;
+}
+
 export function useRequireProfile() {
   const { hasProfile, needsOnboarding, isLoading } = useProfile();
 

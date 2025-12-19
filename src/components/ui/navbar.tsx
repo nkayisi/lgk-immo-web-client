@@ -22,7 +22,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useProfile } from "@/contexts/profile-context";
+import { useProfileSafe } from "@/contexts/profile-context";
 import { getProfileDisplayName, getProfileTypeLabel, ProfileType } from "@/lib/profile/types";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,10 @@ export function Navbar() {
   const [showMobileProfileSwitcher, setShowMobileProfileSwitcher] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { data: session, isPending } = useSession();
-  const { profile, profiles, switchProfile } = useProfile();
+  const profileContext = useProfileSafe();
+  const profile = profileContext?.profile ?? null;
+  const profiles = profileContext?.profiles ?? [];
+  const switchProfile = profileContext?.switchProfile ?? (async () => { });
   const router = useRouter();
   const pathname = usePathname();
 
@@ -549,6 +552,55 @@ export function Navbar() {
                       </div>
                       <span className="text-sm">Paramètres</span>
                     </Link>
+
+                    {/* Espaces */}
+                    {profile?.profileRoles && profile.profileRoles.length > 0 && (
+                      <>
+                        <div className="my-3 border-t border-slate-100" />
+                        <p className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase">
+                          Mes espaces
+                        </p>
+                        {profile.profileRoles.map((roleAssignment) => {
+                          const role = roleAssignment.role;
+                          const roleConfig: Record<string, { icon: typeof User; color: string; bgColor: string }> = {
+                            TENANT: { icon: User, color: "text-blue-600", bgColor: "bg-blue-50" },
+                            LANDLORD: { icon: Building2, color: "text-emerald-600", bgColor: "bg-emerald-50" },
+                            AGENT: { icon: Building2, color: "text-purple-600", bgColor: "bg-purple-50" },
+                          };
+                          const config = roleConfig[role] || roleConfig.TENANT;
+                          const RoleIcon = config.icon;
+                          const roleLabels: Record<string, string> = {
+                            TENANT: "Locataire",
+                            LANDLORD: "Bailleur",
+                            AGENT: "Commissionnaire",
+                          };
+                          const spaceUrl = `/account/space/${role.toLowerCase()}`;
+                          const isSpaceActive = pathname.includes(spaceUrl);
+
+                          return (
+                            <Link
+                              key={role}
+                              href={spaceUrl}
+                              onClick={() => setIsOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                                isSpaceActive
+                                  ? `${config.bgColor} ${config.color}`
+                                  : "text-slate-700 hover:bg-slate-50"
+                              )}
+                            >
+                              <div className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center",
+                                config.bgColor
+                              )}>
+                                <RoleIcon className={cn("w-4 h-4", config.color)} />
+                              </div>
+                              <span className="text-sm">{roleLabels[role]}</span>
+                            </Link>
+                          );
+                        })}
+                      </>
+                    )}
 
                     {/* Déconnexion */}
                     <div className="pt-4 mt-3 border-t border-slate-100">

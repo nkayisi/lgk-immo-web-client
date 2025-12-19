@@ -64,22 +64,19 @@ export default function GetStartedPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => setSelectedType(account.type)}
-                className={`w-full flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200 ${
-                  isSelected
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200 ${isSelected
                     ? "border-slate-900 bg-slate-50 shadow-lg"
                     : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md"
-                }`}
+                  }`}
               >
                 {/* Icon */}
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isSelected ? "bg-slate-900" : "bg-slate-100"
-                  }`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${isSelected ? "bg-slate-900" : "bg-slate-100"
+                    }`}
                 >
                   <Icon
-                    className={`w-6 h-6 ${
-                      isSelected ? "text-white" : "text-slate-600"
-                    }`}
+                    className={`w-6 h-6 ${isSelected ? "text-white" : "text-slate-600"
+                      }`}
                   />
                 </div>
 
@@ -95,11 +92,10 @@ export default function GetStartedPage() {
 
                 {/* Radio Indicator */}
                 <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isSelected
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${isSelected
                       ? "border-slate-900 bg-slate-900"
                       : "border-slate-300"
-                  }`}
+                    }`}
                 >
                   {isSelected && (
                     <motion.div
@@ -122,15 +118,16 @@ export default function GetStartedPage() {
         >
           <Link
             href={
-              selectedType
-                ? `/register?type=${selectedType.toLowerCase()}`
-                : "#"
+              selectedType === ProfileType.BUSINESS
+                ? "/get-started/business"
+                : selectedType === ProfileType.INDIVIDUAL
+                  ? "/register?type=individual"
+                  : "#"
             }
-            className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${
-              selectedType
+            className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${selectedType
                 ? "bg-slate-900 text-white hover:bg-slate-800 shadow-lg hover:shadow-xl"
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
-            }`}
+              }`}
             onClick={(e) => {
               if (!selectedType) e.preventDefault();
             }}
