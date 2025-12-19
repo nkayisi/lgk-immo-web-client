@@ -15,19 +15,27 @@ import {
   User,
   X,
   Activity,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useProfile } from "@/contexts/profile-context";
+import { getProfileDisplayName, getProfileTypeLabel, ProfileType } from "@/lib/profile/types";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileProfileSwitcher, setShowMobileProfileSwitcher] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { data: session, isPending } = useSession();
+  const { profile, profiles, switchProfile } = useProfile();
   const router = useRouter();
+  const pathname = usePathname();
 
   const user = session?.user;
 
@@ -74,13 +82,12 @@ export function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/20 backdrop-blur-xl border-b border-slate-200"
-          : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        ? "bg-white/20 backdrop-blur-xl border-b border-slate-200"
+        : "bg-transparent"
+        }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -162,31 +169,15 @@ export function Navbar() {
                       {/* Menu Items */}
                       <div className="py-2">
                         <Link
-                          href="/dashboard"
+                          href="/account"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                          <span>Tableau de bord</span>
+                          <User className="w-4 h-4 text-slate-400" />
+                          <span>Mon Compte</span>
                         </Link>
                         <Link
-                          href="/dashboard/activity"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                          <Activity className="w-4 h-4 text-slate-400" />
-                          <span>Activités</span>
-                        </Link>
-                        <Link
-                          href="/dashboard/properties"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                          <Building2 className="w-4 h-4 text-slate-400" />
-                          <span>Mes annonces</span>
-                        </Link>
-                        <Link
-                          href="/dashboard/favorites"
+                          href="/account"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
                         >
@@ -194,31 +185,20 @@ export function Navbar() {
                           <span>Favoris</span>
                         </Link>
                         <Link
-                          href="/dashboard/messages"
+                          href="/account/properties"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <Building2 className="w-4 h-4 text-slate-400" />
+                          <span>Mes annonces</span>
+                        </Link>
+                        <Link
+                          href="/account/messages"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
                         >
                           <MessageSquare className="w-4 h-4 text-slate-400" />
                           <span>Messages</span>
-                        </Link>
-                      </div>
-
-                      <div className="border-t border-slate-100 py-2">
-                        <Link
-                          href="/dashboard/profile"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                          <User className="w-4 h-4 text-slate-400" />
-                          <span>Mon profil</span>
-                        </Link>
-                        <Link
-                          href="/dashboard/settings"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                          <Settings className="w-4 h-4 text-slate-400" />
-                          <span>Paramètres</span>
                         </Link>
                       </div>
 
@@ -330,79 +310,197 @@ export function Navbar() {
                 {user ? (
                   // Menu utilisateur connecté (mobile)
                   <div className="space-y-0.5">
-                    {/* User Info Card */}
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl mb-4">
-                      {user.image ? (
-                        <Image
-                          src={user.image}
-                          alt={user.name || "Avatar"}
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-sm font-medium">
-                          {getInitials(user.name)}
+                    {/* Profile Switcher */}
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setShowMobileProfileSwitcher(!showMobileProfileSwitcher)}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-medium">
+                            {profile ? getProfileDisplayName(profile).charAt(0).toUpperCase() : "U"}
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-slate-900 truncate max-w-[140px]">
+                              {profile ? getProfileDisplayName(profile) : user.name}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {profile ? getProfileTypeLabel(profile.profileType) : user.email}
+                            </p>
+                          </div>
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-slate-900 truncate">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">
-                          {user.email}
-                        </p>
-                      </div>
+                        <ChevronDown
+                          className={cn(
+                            "w-4 h-4 text-slate-400 transition-transform",
+                            showMobileProfileSwitcher && "rotate-180"
+                          )}
+                        />
+                      </button>
+
+                      {/* Profile Dropdown */}
+                      <AnimatePresence>
+                        {showMobileProfileSwitcher && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-2 bg-white rounded-xl border border-slate-200 overflow-hidden"
+                          >
+                            <div className="p-2">
+                              <p className="px-3 py-2 text-xs font-medium text-slate-400 uppercase">
+                                Changer de profil
+                              </p>
+                              {profiles.map((p) => (
+                                <button
+                                  key={p.id}
+                                  onClick={async () => {
+                                    if (p.id !== profile?.id) {
+                                      await switchProfile(p.id);
+                                    }
+                                    setShowMobileProfileSwitcher(false);
+                                  }}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                                    p.id === profile?.id
+                                      ? "bg-emerald-50 text-emerald-700"
+                                      : "hover:bg-slate-50 text-slate-700"
+                                  )}
+                                >
+                                  <div
+                                    className={cn(
+                                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+                                      p.profileType === ProfileType.INDIVIDUAL
+                                        ? "bg-blue-100 text-blue-600"
+                                        : "bg-purple-100 text-purple-600"
+                                    )}
+                                  >
+                                    {p.profileType === ProfileType.INDIVIDUAL ? (
+                                      <User className="w-4 h-4" />
+                                    ) : (
+                                      <Building2 className="w-4 h-4" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 text-left">
+                                    <p className="text-sm font-medium">{getProfileDisplayName(p)}</p>
+                                    <p className="text-xs text-slate-500">
+                                      {getProfileTypeLabel(p.profileType)}
+                                    </p>
+                                  </div>
+                                  {p.id === profile?.id && (
+                                    <Check className="w-4 h-4 text-emerald-600" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Navigation Links */}
+                 
                     <Link
-                      href="/dashboard"
+                      href="/account"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname === "/account"
+                          ? "bg-blue-100 text-blue-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                        <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname === "/account" ? "bg-blue-200" : "bg-blue-50"
+                      )}>
+                        <LayoutDashboard className={cn(
+                          "w-4 h-4",
+                          pathname === "/account" ? "text-blue-700" : "text-blue-600"
+                        )} />
                       </div>
                       <span className="text-sm">Tableau de bord</span>
                     </Link>
                     <Link
-                      href="/dashboard/activity"
+                      href="/account/activity"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname === "/account/activity"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-orange-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname === "/account/activity" ? "bg-yellow-200" : "bg-yellow-50"
+                      )}>
+                        <Activity className={cn(
+                          "w-4 h-4",
+                          pathname === "/account/activity" ? "text-yellow-700" : "text-yellow-600"
+                        )} />
                       </div>
                       <span className="text-sm">Activités</span>
                     </Link>
                     <Link
-                      href="/dashboard/properties"
+                      href="/account/properties"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname.startsWith("/account/properties")
+                          ? "bg-orange-100 text-orange-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                        <Building2 className="w-4 h-4 text-blue-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname.startsWith("/account/properties") ? "bg-orange-200" : "bg-orange-50"
+                      )}>
+                        <Building2 className={cn(
+                          "w-4 h-4",
+                          pathname.startsWith("/account/properties") ? "text-orange-700" : "text-orange-600"
+                        )} />
                       </div>
                       <span className="text-sm">Mes annonces</span>
                     </Link>
                     <Link
-                      href="/dashboard/favorites"
+                      href="/account/favorites"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname.startsWith("/account/favorites")
+                          ? "bg-pink-100 text-pink-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center">
-                        <Heart className="w-4 h-4 text-pink-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname.startsWith("/account/favorites") ? "bg-pink-200" : "bg-pink-50"
+                      )}>
+                        <Heart className={cn(
+                          "w-4 h-4",
+                          pathname.startsWith("/account/favorites") ? "text-pink-700" : "text-pink-600"
+                        )} />
                       </div>
                       <span className="text-sm">Favoris</span>
                     </Link>
                     <Link
-                      href="/dashboard/messages"
+                      href="/account/messages"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname.startsWith("/account/messages")
+                          ? "bg-purple-100 text-purple-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                        <MessageSquare className="w-4 h-4 text-purple-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname.startsWith("/account/messages") ? "bg-purple-200" : "bg-purple-50"
+                      )}>
+                        <MessageSquare className={cn(
+                          "w-4 h-4",
+                          pathname.startsWith("/account/messages") ? "text-purple-700" : "text-purple-600"
+                        )} />
                       </div>
                       <span className="text-sm">Messages</span>
                     </Link>
@@ -410,22 +508,44 @@ export function Navbar() {
                     <div className="my-3 border-t border-slate-100" />
 
                     <Link
-                      href="/dashboard/profile"
+                      href="/account/profile"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname.startsWith("/account/profile")
+                          ? "bg-slate-200 text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                        <User className="w-4 h-4 text-slate-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname.startsWith("/account/profile") ? "bg-slate-300" : "bg-slate-100"
+                      )}>
+                        <User className={cn(
+                          "w-4 h-4",
+                          pathname.startsWith("/account/profile") ? "text-slate-900" : "text-slate-600"
+                        )} />
                       </div>
                       <span className="text-sm">Mon profil</span>
                     </Link>
                     <Link
-                      href="/dashboard/settings"
+                      href="/account/settings"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-2 px-2 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-2 rounded-lg transition-colors",
+                        pathname.startsWith("/account/settings")
+                          ? "bg-slate-200 text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                        <Settings className="w-4 h-4 text-slate-600" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        pathname.startsWith("/account/settings") ? "bg-slate-300" : "bg-slate-100"
+                      )}>
+                        <Settings className={cn(
+                          "w-4 h-4",
+                          pathname.startsWith("/account/settings") ? "text-slate-900" : "text-slate-600"
+                        )} />
                       </div>
                       <span className="text-sm">Paramètres</span>
                     </Link>
