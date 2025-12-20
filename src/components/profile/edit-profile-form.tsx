@@ -270,7 +270,7 @@ export function EditProfileForm({
                                     htmlFor="nationalIdNumber"
                                     className="block text-sm font-medium text-slate-700 mb-1"
                                 >
-                                    Numéro de carte d'identité
+                                    Numéro de carte d&apos;identité
                                 </label>
                                 <input
                                     type="text"
@@ -290,7 +290,7 @@ export function EditProfileForm({
                     {isBusiness && profile.businessProfile && (
                         <div className="space-y-4 pt-4 border-t border-slate-200">
                             <h3 className="font-semibold text-slate-900">
-                                Informations de l'entreprise
+                                Informations de l&apos;entreprise
                             </h3>
 
                             <div>
@@ -298,7 +298,7 @@ export function EditProfileForm({
                                     htmlFor="businessName"
                                     className="block text-sm font-medium text-slate-700 mb-1"
                                 >
-                                    Nom de l'entreprise
+                                    Nom de l&apos;entreprise
                                 </label>
                                 <input
                                     type="text"
@@ -316,7 +316,7 @@ export function EditProfileForm({
                                         htmlFor="registrationNumber"
                                         className="block text-sm font-medium text-slate-700 mb-1"
                                     >
-                                        Numéro d'enregistrement
+                                        Numéro d&apos;enregistrement
                                     </label>
                                     <input
                                         type="text"

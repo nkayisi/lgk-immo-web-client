@@ -179,7 +179,7 @@ export function BusinessProfileForm({
         <div className="relative mb-6">
           <div className="h-1 bg-slate-200 rounded-full">
             <motion.div
-              className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+              className="h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
               initial={{ width: 0 }}
               animate={{
                 width: `${((currentStep + 1) / steps.length) * 100}%`,
@@ -197,9 +197,9 @@ export function BusinessProfileForm({
                   onClick={() => setCurrentStep(index)}
                   className={`
                     w-5 h-5 rounded-full border-2 transition-all
-                    ${isActive ? "bg-blue-500 border-blue-500 scale-125" : ""}
+                    ${isActive ? "bg-emerald-500 border-emerald-500 scale-125" : ""}
                     ${isCompleted
-                      ? "bg-blue-500 border-blue-500"
+                      ? "bg-emerald-500 border-emerald-500"
                       : "bg-white border-slate-300"
                     }
                   `}
@@ -222,9 +222,9 @@ export function BusinessProfileForm({
                 className={`
                   flex flex-col items-center gap-1.5 transition-all
                   ${isActive
-                    ? "text-blue-600"
+                    ? "text-emerald-600"
                     : isCompleted
-                      ? "text-blue-500"
+                      ? "text-emerald-500"
                       : "text-slate-400"
                   }
                 `}
@@ -233,9 +233,9 @@ export function BusinessProfileForm({
                   className={`
                     w-10 h-10 rounded-xl flex items-center justify-center transition-all
                     ${isActive
-                      ? "bg-blue-100 shadow-sm"
+                      ? "bg-emerald-100 shadow-sm"
                       : isCompleted
-                        ? "bg-blue-50"
+                        ? "bg-emerald-50"
                         : "bg-slate-100"
                     }
                   `}
@@ -296,7 +296,7 @@ export function BusinessProfileForm({
                   value={formData.businessName}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="Immo Congo SARL"
                 />
               </div>
@@ -310,7 +310,7 @@ export function BusinessProfileForm({
                   name="legalRepresentativeName"
                   value={formData.legalRepresentativeName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="Nom du gérant ou directeur"
                 />
               </div>
@@ -329,7 +329,7 @@ export function BusinessProfileForm({
                   name="registrationNumber"
                   value={formData.registrationNumber}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="RC/KIN/2024/A/12345"
                 />
                 <p className="text-xs text-slate-500 mt-1">
@@ -346,7 +346,7 @@ export function BusinessProfileForm({
                   name="taxId"
                   value={formData.taxId}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="A1234567890"
                 />
                 <p className="text-xs text-slate-500 mt-1">
@@ -354,8 +354,8 @@ export function BusinessProfileForm({
                 </p>
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-700">
+              <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <p className="text-sm text-emerald-700">
                   <strong>Note :</strong> Ces informations permettront de
                   vérifier votre entreprise et d&apos;obtenir le badge
                   &quot;Professionnel vérifié&quot;.
@@ -376,7 +376,7 @@ export function BusinessProfileForm({
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="+243 999 999 999"
                 />
                 <p className="text-xs text-slate-500 mt-1">
@@ -397,7 +397,7 @@ export function BusinessProfileForm({
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-white"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all bg-white"
                 >
                   <option value="RDC">République Démocratique du Congo</option>
                   <option value="Congo">République du Congo</option>
@@ -416,7 +416,7 @@ export function BusinessProfileForm({
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   placeholder="Kinshasa"
                 />
               </div>
@@ -430,7 +430,7 @@ export function BusinessProfileForm({
                   value={formData.address}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all resize-none"
                   placeholder="Avenue, numéro, commune..."
                 />
               </div>
@@ -477,7 +477,7 @@ export function BusinessProfileForm({
                   type="button"
                   onClick={nextStep}
                   disabled={!canProceed()}
-                  className="px-6 py-2.5 rounded-xl font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="px-6 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   Suivant
                 </button>
@@ -486,7 +486,7 @@ export function BusinessProfileForm({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isLoading || !formData.businessName}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
                 >
                   {isLoading ? (
                     <>
@@ -510,7 +510,7 @@ export function BusinessProfileForm({
                 type="button"
                 onClick={handleContinueLater}
                 disabled={isLoading || !formData.businessName.trim()}
-                className="text-sm text-slate-500 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-sm text-slate-500 hover:text-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continuer plus tard et créer mon profil maintenant
               </button>

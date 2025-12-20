@@ -224,7 +224,7 @@ export default function ProfilePage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">
-                                            Numéro de carte d'identité
+                                            Numéro de carte d&apos;identité
                                         </label>
                                         <input
                                             type="text"
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                                 />
                                 <InfoRow
                                     icon={<CreditCard className="w-5 h-5" />}
-                                    label="Numéro de carte d'identité"
+                                    label="Numéro de carte d&apos;identité"
                                     value={profile.individualProfile?.nationalIdNumber}
                                 />
                             </div>
@@ -282,13 +282,13 @@ export default function ProfilePage() {
                 {isBusiness && (
                     <div className="flex-1 h-full mb-6">
                         <ProfileSection
-                            title="Informations de l'entreprise"
+                            title="Informations de l&apos;entreprise"
                             onSave={handleUpdateBusiness}
                             editForm={
                                 <form id="business-form" className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">
-                                            Nom de l'entreprise
+                                            Nom de l&apos;entreprise
                                         </label>
                                         <input
                                             type="text"
@@ -301,7 +301,7 @@ export default function ProfilePage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">
-                                                Numéro d'enregistrement
+                                                Numéro d&apos;enregistrement
                                             </label>
                                             <input
                                                 type="text"
@@ -342,12 +342,12 @@ export default function ProfilePage() {
                             <div className="space-y-3">
                                 <InfoRow
                                     icon={<Building2 className="w-5 h-5" />}
-                                    label="Nom de l'entreprise"
+                                    label="Nom de l&apos;entreprise"
                                     value={profile.businessProfile?.businessName}
                                 />
                                 <InfoRow
                                     icon={<FileText className="w-5 h-5" />}
-                                    label="Numéro d'enregistrement"
+                                    label="Numéro d&apos;enregistrement"
                                     value={profile.businessProfile?.registrationNumber}
                                 />
                                 <InfoRow
@@ -467,7 +467,7 @@ export default function ProfilePage() {
                                 </h3>
                                 <p className="text-slate-600 text-sm mb-4">
                                     {canAddIndividual && canAddBusiness
-                                        ? "Créez un profil particulier ou professionnel pour gérer différents types d'activités."
+                                        ? "Créez un profil particulier ou professionnel pour gérer différents types d&apos;activités."
                                         : canAddIndividual
                                             ? "Créez un profil particulier pour vos activités personnelles."
                                             : "Créez un profil professionnel pour votre entreprise."}

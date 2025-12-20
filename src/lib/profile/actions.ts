@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import {
   ProfileType,
   ProfileRole,
+  Gender,
   type CreateIndividualProfileInput,
   type CreateBusinessProfileInput,
   type UpdateIndividualProfileInput,
@@ -854,7 +855,7 @@ export async function updatePersonalInfo(
             firstName: data.firstName,
             lastName: data.lastName,
             dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
-            gender: data.gender as any,
+            gender: data.gender as Gender,
             nationalIdNumber: data.nationalIdNumber,
           },
         },

@@ -91,23 +91,20 @@ export function AddProfileModal({
                         !isDisabled && setSelectedType(profile.type)
                       }
                       disabled={isDisabled}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                        isDisabled
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${isDisabled
                           ? "opacity-50 cursor-not-allowed bg-slate-50 border-slate-200"
                           : isSelected
-                          ? "border-slate-900 bg-slate-50 shadow-md"
-                          : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
-                      }`}
+                            ? "border-slate-900 bg-slate-50 shadow-md"
+                            : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                        }`}
                     >
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          isSelected ? "bg-slate-900" : "bg-slate-100"
-                        }`}
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${isSelected ? "bg-emerald-600" : "bg-slate-100"
+                          }`}
                       >
                         <Icon
-                          className={`w-6 h-6 ${
-                            isSelected ? "text-white" : "text-slate-600"
-                          }`}
+                          className={`w-6 h-6 ${isSelected ? "text-white" : "text-slate-600"
+                            }`}
                         />
                       </div>
                       <div className="flex-1 text-left">
@@ -119,7 +116,7 @@ export function AddProfileModal({
                         </p>
                       </div>
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
                           <div className="w-2 h-2 rounded-full bg-white" />
                         </div>
                       )}
@@ -139,7 +136,7 @@ export function AddProfileModal({
                 <button
                   onClick={handleContinue}
                   disabled={!selectedType}
-                  className="flex-1 px-4 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+                  className="flex-1 px-4 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
                 >
                   Continuer
                 </button>
