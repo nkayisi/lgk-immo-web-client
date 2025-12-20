@@ -9,7 +9,7 @@ import {
     ProfileRole,
 } from "@/lib/profile/types";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Activity,
@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ProfileSwitcher } from "../profile";
 
 interface NavItem {
     label: string;
@@ -74,6 +75,8 @@ export function AccountSidebar() {
     const { profile, profiles, switchProfile, isLoading } = useProfile();
     const [showProfileSwitcher, setShowProfileSwitcher] = useState(false);
 
+    const { data: session, isPending } = useSession();
+
     const handleSignOut = async () => {
         await signOut();
         router.push("/");
@@ -97,89 +100,13 @@ export function AccountSidebar() {
 
     return (
         <aside className="w-64 sticky top-20 min-h-[calc(100vh-5rem)] bg-[#faf8f5] border-r border-slate-200 hidden sm:flex flex-col">
-            {/* Profile Switcher */}
-            <div className="p-4 border-b border-slate-200">
-                <div className="relative">
-                    <button
-                        onClick={() => setShowProfileSwitcher(!showProfileSwitcher)}
-                        className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition-colors"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-medium">
-                                {profile ? getProfileDisplayName(profile).charAt(0).toUpperCase() : "U"}
-                            </div>
-                            <div className="text-left">
-                                <p className="text-sm font-medium text-slate-900 truncate max-w-[120px]">
-                                    {profile ? getProfileDisplayName(profile) : "Chargement..."}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                    {profile ? getProfileTypeLabel(profile.profileType) : ""}
-                                </p>
-                            </div>
-                        </div>
-                        <ChevronDown
-                            className={cn(
-                                "w-4 h-4 text-slate-400 transition-transform",
-                                showProfileSwitcher && "rotate-180"
-                            )}
-                        />
-                    </button>
 
-                    {/* Profile Dropdown */}
-                    <AnimatePresence>
-                        {showProfileSwitcher && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -8 }}
-                                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden z-50"
-                            >
-                                <div className="p-2">
-                                    <p className="px-3 py-2 text-xs font-medium text-slate-400 uppercase">
-                                        Changer de profil
-                                    </p>
-                                    {profiles.map((p) => (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => handleSwitchProfile(p.id)}
-                                            className={cn(
-                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                                                p.id === profile?.id
-                                                    ? "bg-emerald-50 text-emerald-700"
-                                                    : "hover:bg-slate-50 text-slate-700"
-                                            )}
-                                        >
-                                            <div
-                                                className={cn(
-                                                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-                                                    p.profileType === ProfileType.INDIVIDUAL
-                                                        ? "bg-blue-100 text-blue-600"
-                                                        : "bg-purple-100 text-purple-600"
-                                                )}
-                                            >
-                                                {p.profileType === ProfileType.INDIVIDUAL ? (
-                                                    <User className="w-4 h-4" />
-                                                ) : (
-                                                    <Building2 className="w-4 h-4" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 text-left">
-                                                <p className="text-sm font-medium">{getProfileDisplayName(p)}</p>
-                                                <p className="text-xs text-slate-500">
-                                                    {getProfileTypeLabel(p.profileType)}
-                                                </p>
-                                            </div>
-                                            {p.id === profile?.id && (
-                                                <Check className="w-4 h-4 text-emerald-600" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
+            {/* Profile Switcher - Only show if user is logged in and has profiles */}
+            {session?.user && profile && profiles.length > 0 && (
+              <div className="p-4 border-b border-slate-200">
+                <ProfileSwitcher variant="dropdown" />
+              </div>
+            )}
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto py-4">

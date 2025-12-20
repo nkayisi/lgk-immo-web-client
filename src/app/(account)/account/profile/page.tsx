@@ -10,6 +10,7 @@ import {
     calculateProfileCompletion,
     ProfileRole,
     getProfileRoleLabel,
+    ProfileType,
 } from "@/lib/profile/types";
 import { motion } from "framer-motion";
 import { Home, Key, Briefcase, Plus, Mail, Calendar, CreditCard, FileText, Users, Phone, MapPin, User, Building2 } from "lucide-react";
@@ -17,9 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { addProfileRole, updateContactInfo, updatePersonalInfo, updateBusinessInfo } from "@/lib/profile/actions";
 import { ProfileSection, InfoRow } from "@/components/profile/profile-section";
+import Link from "next/link";
 
 export default function ProfilePage() {
-    const { profile, refreshProfile } = useProfile();
+    const { profile, profiles, refreshProfile } = useProfile();
     const [isAddingRole, setIsAddingRole] = useState(false);
 
     if (!profile) {
@@ -32,6 +34,11 @@ export default function ProfilePage() {
 
     const activeRoles = profile.profileRoles?.map(r => r.role) || [];
     const availableRoles = Object.values(ProfileRole).filter(role => !activeRoles.includes(role));
+
+    // Vérifier si l'utilisateur peut ajouter un autre type de profil
+    const canAddIndividual = !profiles.some(p => p.profileType === ProfileType.INDIVIDUAL);
+    const canAddBusiness = !profiles.some(p => p.profileType === ProfileType.BUSINESS);
+    const canAddAnotherProfile = canAddIndividual || canAddBusiness;
 
     const roleIcons: Record<ProfileRole, typeof Home> = {
         [ProfileRole.TENANT]: Home,
@@ -448,6 +455,47 @@ export default function ProfilePage() {
                     </ProfileSection>
                 </div>
             </div>
+
+            {/* Ajouter un autre profil */}
+            {canAddAnotherProfile && (
+                <Card className="bg-gradient-to-br from-emerald-50 to-cyan-50 border-emerald-200">
+                    <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                                    Ajouter un autre profil
+                                </h3>
+                                <p className="text-slate-600 text-sm mb-4">
+                                    {canAddIndividual && canAddBusiness
+                                        ? "Créez un profil particulier ou professionnel pour gérer différents types d'activités."
+                                        : canAddIndividual
+                                            ? "Créez un profil particulier pour vos activités personnelles."
+                                            : "Créez un profil professionnel pour votre entreprise."}
+                                </p>
+                                <Link
+                                    href="/account/profiles/add"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Ajouter un profil
+                                </Link>
+                            </div>
+                            <div className="hidden md:flex items-center gap-2">
+                                {canAddIndividual && (
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                        <User className="w-6 h-6 text-white" />
+                                    </div>
+                                )}
+                                {canAddBusiness && (
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                                        <Building2 className="w-6 h-6 text-white" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Mes Espaces / Rôles */}
             <Card className="bg-white">

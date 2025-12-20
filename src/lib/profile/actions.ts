@@ -259,11 +259,10 @@ export async function createIndividualProfile(
         });
       }
 
-      // Récupérer le profil complet avec les rôles
-      return await tx.profile.findUnique({
-        where: { id: newProfile.id },
-        include: profileInclude,
-      });
+      // Retourner directement le profil créé (déjà complet avec profileInclude)
+      return newProfile;
+    }, {
+      timeout: 10000, // 10 secondes
     });
 
     // Mettre à jour la certification
@@ -281,9 +280,10 @@ export async function createIndividualProfile(
     };
   } catch (error) {
     console.error("[Profile] Error creating individual profile:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
     return {
       success: false,
-      message: "Erreur lors de la création du profil",
+      message: `Erreur lors de la création du profil: ${errorMessage}`,
       profile: null,
     };
   }
@@ -355,11 +355,10 @@ export async function createBusinessProfile(
         });
       }
 
-      // Récupérer le profil complet avec les rôles
-      return await tx.profile.findUnique({
-        where: { id: newProfile.id },
-        include: profileInclude,
-      });
+      // Retourner directement le profil créé (déjà complet avec profileInclude)
+      return newProfile;
+    }, {
+      timeout: 10000, // 10 secondes
     });
 
     // Mettre à jour la certification
@@ -377,9 +376,10 @@ export async function createBusinessProfile(
     };
   } catch (error) {
     console.error("[Profile] Error creating business profile:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
     return {
       success: false,
-      message: "Erreur lors de la création du profil",
+      message: `Erreur lors de la création du profil: ${errorMessage}`,
       profile: null,
     };
   }

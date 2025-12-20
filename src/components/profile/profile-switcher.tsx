@@ -61,7 +61,7 @@ export function ProfileSwitcher({
 
   if (variant === "list") {
     return (
-      <div className="space-y-2">
+      <div className="w-full space-y-2">
         {profiles.map((p) => {
           const isActive = p.id === profile.id;
           const isIndividual = isIndividualProfile(p);
@@ -74,20 +74,18 @@ export function ProfileSwitcher({
               disabled={isLoading}
               className={`
                 w-full flex items-center gap-3 p-3 rounded-xl transition-all
-                ${
-                  isActive
-                    ? "bg-emerald-50 border-2 border-emerald-500"
-                    : "bg-white border-2 border-slate-200 hover:border-slate-300"
+                ${isActive
+                  ? "bg-emerald-50 border-2 border-emerald-500"
+                  : "bg-white border-2 border-slate-200 hover:border-slate-300"
                 }
               `}
             >
               <div
                 className={`
                   w-10 h-10 rounded-xl flex items-center justify-center
-                  ${
-                    isIndividual
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-500"
-                      : "bg-gradient-to-br from-blue-500 to-indigo-500"
+                  ${isIndividual
+                    ? "bg-gradient-to-br from-emerald-500 to-teal-500"
+                    : "bg-gradient-to-br from-blue-500 to-indigo-500"
                   }
                 `}
               >
@@ -99,7 +97,7 @@ export function ProfileSwitcher({
               </div>
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-slate-900 truncate">
                     {displayName}
                   </span>
                   {p.isCertified && (
@@ -122,7 +120,7 @@ export function ProfileSwitcher({
             <div className="flex gap-2">
               {canAddIndividual && (
                 <Link
-                  href="/onboarding?type=individual&add=true"
+                  href="/account/profiles/add"
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
@@ -131,7 +129,7 @@ export function ProfileSwitcher({
               )}
               {canAddBusiness && (
                 <Link
-                  href="/onboarding?type=business&add=true"
+                  href="/account/profiles/add"
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 text-slate-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
@@ -154,41 +152,41 @@ export function ProfileSwitcher({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
-        className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition-all"
+        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition-all"
       >
-        <div
-          className={`
-            w-8 h-8 rounded-lg flex items-center justify-center
-            ${
-              isIndividual
+        <div className="flex items-center gap-3">
+          <div
+            className={`
+            w-9 h-9 rounded-lg flex items-center justify-center
+            ${isIndividual
                 ? "bg-gradient-to-br from-emerald-500 to-teal-500"
                 : "bg-gradient-to-br from-blue-500 to-indigo-500"
-            }
+              }
           `}
-        >
-          {isIndividual ? (
-            <User className="w-4 h-4 text-white" />
-          ) : (
-            <Building2 className="w-4 h-4 text-white" />
-          )}
-        </div>
-        <div className="text-left">
-          <div className="flex items-center gap-1">
-            <span className="text-sm font-medium text-slate-900">
-              {displayName}
-            </span>
-            {profile.isCertified && (
-              <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+          >
+            {isIndividual ? (
+              <User className="w-4 h-4 text-white" />
+            ) : (
+              <Building2 className="w-4 h-4 text-white" />
             )}
           </div>
-          <span className="text-xs text-slate-500">
-            {isIndividual ? "Particulier" : "Professionnel"}
-          </span>
+          <div className="text-left leading-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-slate-900">
+                {displayName}
+              </span>
+              {profile.isCertified && (
+                <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+              )}
+            </div>
+            <span className="text-xs text-slate-500">
+              {isIndividual ? "Particulier" : "Professionnel"}
+            </span>
+          </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""
+            }`}
         />
       </button>
 
@@ -223,10 +221,9 @@ export function ProfileSwitcher({
                       <div
                         className={`
                           w-8 h-8 rounded-lg flex items-center justify-center
-                          ${
-                            pIsIndividual
-                              ? "bg-gradient-to-br from-emerald-500 to-teal-500"
-                              : "bg-gradient-to-br from-blue-500 to-indigo-500"
+                          ${pIsIndividual
+                            ? "bg-gradient-to-br from-emerald-500 to-teal-500"
+                            : "bg-gradient-to-br from-blue-500 to-indigo-500"
                           }
                         `}
                       >
@@ -236,7 +233,7 @@ export function ProfileSwitcher({
                           <Building2 className="w-4 h-4 text-white" />
                         )}
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 leading-3 text-left">
                         <div className="flex items-center gap-1">
                           <span className="text-sm font-medium text-slate-900">
                             {pDisplayName}
@@ -261,19 +258,19 @@ export function ProfileSwitcher({
                 <div className="border-t border-slate-100 p-2">
                   {canAddIndividual && (
                     <Link
-                      href="/onboarding?type=individual&add=true"
+                      href="/account/profiles/add"
                       className="flex items-center gap-2 p-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       <Plus className="w-4 h-4" />
-                      <span className="text-sm">
+                      <span className="text-xs">
                         Ajouter un profil particulier
                       </span>
                     </Link>
                   )}
                   {canAddBusiness && (
                     <Link
-                      href="/onboarding?type=business&add=true"
+                      href="/account/profiles/add"
                       className="flex items-center gap-2 p-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
